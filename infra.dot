@@ -1,0 +1,74 @@
+# http://www.graphviz.org/content/cluster
+
+digraph G {
+
+rankdir="LR";
+
+subgraph cluster_twittercom {
+	label="Twitter";
+	style=filled;
+	color=lightblue;
+	// node [style=filled,color=white];
+
+  tw [label = "Twitter"];
+  tw_api;
+  tw_export;
+	// a0 -> a1 -> a2 -> a3;
+}
+tw -> tw_api;
+tw -> tw_export;
+
+subgraph cluster_endomondo {
+	label="Endomondo";
+  style=filled;
+  color=green;
+  endm;
+  end_api;
+	// node [style=filled];
+	// b0 -> b1 -> b2 -> b3;
+}
+
+endm -> end_api;
+
+# TODO manual separately?
+tw_export -> manual_dl -> exp_twitter_archives;
+
+subgraph cluster_pipelines {
+  label="Pipelines";
+  style=filled;
+  color=brown;
+
+  twexport;
+
+  tw_api  -> twexport   -> exp_twitter;
+  end_api -> endoexport -> exp_endomondo;
+}
+
+subgraph backups {
+  exp_twitter_archives -> borg;
+  exp_twitter          -> borg
+  exp_endomondo        -> borg;
+}
+# TODO position borg above
+
+# TODO svg output with links
+subgraph cluester_backups {
+  borg;
+}
+
+subgraph cluster_ui {
+  label="User interfaces";
+  style=filled;
+  color=pink;
+
+  browser;
+}
+
+// a1 -> b3;
+// b2 -> a3;
+// a3 -> a0;
+// a3 -> end;
+// b3 -> end;
+
+// end [shape=Mdiamond];
+}
