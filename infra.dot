@@ -28,13 +28,23 @@ subgraph cluster_endomondo {
 	// node [style=filled];
 	// b0 -> b1 -> b2 -> b3;
 }
-
 endm -> end_api;
+
+# TODO indicate frequencies?
+
+subgraph cluster_kobo {
+  label="Kobo reader";
+  style=filled;
+  color=gray;
+  kobo;
+  kobo -> kobo_sqlite;
+}
 
 
 subgraph exports {
   node [shape=cylinder];
 
+  exp_kobo;
   exp_twitter_archives;
   exp_twitter;
   exp_endomondo;
@@ -52,13 +62,16 @@ subgraph cluster_pipelines {
 
   manual_dl[shape=invtrapezium];
 
-  tw_export -> manual_dl  -> exp_twitter_archives;
-  tw_api    -> twexport   -> exp_twitter;
-  end_api   -> endoexport -> exp_endomondo;
+  tw_export   -> manual_dl  -> exp_twitter_archives;
+  tw_api      -> twexport   -> exp_twitter;
+  end_api     -> endoexport -> exp_endomondo;
+  kobo_sqlite -> kobuddy    -> exp_kobo;
 
   exp_twitter_archives           -> mypkg;
   exp_twitter   -> dal_twitter   -> mypkg;
   exp_endomondo -> dal_endomondo -> mypkg;
+  exp_kobo      -> dal_kobuddy   -> mypkg;
+
 }
 
 # TODO distinguish manual and automatic nodes?
@@ -71,6 +84,7 @@ subgraph cluster_backups {
   label="Backups";
   borg;
 
+  exp_kobo             -> borg [style=dashed];
   exp_twitter_archives -> borg [style=dashed];
   exp_twitter          -> borg [style=dashed];
   exp_endomondo        -> borg [style=dashed];
@@ -81,7 +95,16 @@ subgraph cluster_backups {
 subgraph cluster_orger {
   label=Orger;
   module_twitter;
+  module_kobo;
 }
+mypkg -> module_twitter;
+mypkg -> module_kobo;
+
+module_twitter -> twitter_org;
+module_kobo    -> kobo_org;
+
+# TODO cloudmacs?
+# TODO arctee
 
 subgraph cluster_ui {
   label="User interfaces";
@@ -94,7 +117,6 @@ subgraph cluster_ui {
 
 mypkg -> timeline;
 mypkg -> dashboard;
-mypkg -> module_twitter -> twitter_org;
 mypkg -> promnesia;
 
 
@@ -103,6 +125,7 @@ timeline  -> browser;
 dashboard -> browser;
 
 
+kobo_org    -> emacs;
 twitter_org -> emacs;
 
 
