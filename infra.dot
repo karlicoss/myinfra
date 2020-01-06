@@ -60,12 +60,30 @@ subgraph cluster_instapaper {
   ip_api;
 }
 
+# TODO demonstrate that it's dead
+subgraph cluster_jawbone {
+  label="Jawbone\n(dead)";
+  style=filled;
+  color=orange;
+
+  jb_api;
+}
+
+subgraph cluster_emfit {
+  label="Emfit";
+  style=filled;
+  color=grey;
+
+  emfit_wifi; # TODO
+  emfit_api;
+}
 
 # TODO hmm. how to still draw a frame around it?
 subgraph cluster_pipelines {
   label="Pipelines";
   style=filled;
-  color=brown;
+  color=coral;
+  # TODO https://www.graphviz.org/doc/info/colors.html
 
   # TODO more like 'cluster_fs'?
   # meh
@@ -76,11 +94,15 @@ subgraph cluster_pipelines {
     style=dashed;
     color=black;
 
+    exp_jawbone;
     exp_kobo;
     exp_takeouts;
     # TODO mention kython.ktakeout??
     exp_twitter_archives;
+
+    exp_emfit;
     exp_twitter;
+
     exp_endomondo;
     exp_instapaper;
 
@@ -93,13 +115,18 @@ subgraph cluster_pipelines {
   twexport;
   endoexport;
   ipexport;
+  jbexport [shape=cds];
+  # TODO eh, figure out better shape for 'dead'
+  # TODO perhaps makes more sense to mark edge?
 
   tw_manual[shape=invtrapezium];
   takeout  [shape=invtrapezium];
 
-  "Takeout"   -> takeout    -> exp_takeouts;
-  tw_export   -> tw_manual  -> exp_twitter_archives;
-  tw_api      -> twexport   -> exp_twitter;
+  "Takeout"   -> takeout     -> exp_takeouts;
+  tw_export   -> tw_manual   -> exp_twitter_archives;
+  tw_api      -> twexport    -> exp_twitter;
+  jb_api      -> jbexport    -> exp_jawbone;
+  emfit_api   -> emfitexport -> exp_emfit;
 
   end_api     -> endoexport -> exp_endomondo;
   ip_api      -> ipexport   -> exp_instapaper;
@@ -107,8 +134,25 @@ subgraph cluster_pipelines {
   kobo_sqlite -> kobuddy    -> exp_kobo;
 
 
+  mypkg;
+  # TODO eh, not sure about that
+  // subgraph cluster_mypkg {
+  //   label="my. ";
+  //   style=dashed;
+  //   mypkg;
+  //   "sleep.py";
+  //    "tweets.py";
+  // }
+
   exp_takeouts                    -> mypkg [label="location data"];
   exp_twitter_archives            -> mypkg;
+  exp_jawbone                     -> mypkg;
+  # TODO note how this edge is still active despite the fact that jbexport isn't working anymore
+  exp_emfit                       -> mypkg;
+  # TODO as you can see not everything has data access layer
+  # so there is still something to work on
+
+
   exp_twitter    -> dal_twitter   -> mypkg;
   exp_endomondo  -> dal_endomondo -> mypkg;
   exp_instapaper -> dal_ip        -> mypkg;
@@ -200,9 +244,13 @@ mypkg -> dashboard [label="Calendar"];
 mypkg -> dashboard [label="Sleep"];
 mypkg -> dashboard [label="Exercise"];
 # TODO perhaps I need HR provider?
-mypkg -> dahsboard [label="Blood data"];
+mypkg -> dashboard [label="Blood data"];
 mypkg -> dashboard [label="Weight"];
 
+# TODO distinguish regular manual tasks and 'only once' manual tasks
+# perhaps highlight regular manual with red
+# TODO kobo -- semi manual?
+# https://www.graphviz.org/doc/info/shapes.html
 
 promnesia [shape=star];
 
@@ -257,5 +305,8 @@ mypkg       -> blog_hb_kcals;
 mypkg       -> blog_mypkg;
 takeout     -> blog_takeout_data_gone;
 // 
+
+// TODO right. I think I need to add browser history and that's it. publish straigh away after that
+// TODO ok, that's ki
 
 }
