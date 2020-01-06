@@ -1,8 +1,9 @@
 # http://www.graphviz.org/content/cluster
 
 digraph G {
+  node [shape="box"];
+  rankdir="LR";
 
-rankdir="LR";
 
 subgraph cluster_twittercom {
 	label="Twitter";
@@ -11,8 +12,8 @@ subgraph cluster_twittercom {
 	// node [style=filled,color=white];
 
   tw [label = "Twitter"];
-  tw_api;
   tw_export;
+  tw_api;
 	// a0 -> a1 -> a2 -> a3;
 }
 tw -> tw_api;
@@ -30,8 +31,16 @@ subgraph cluster_endomondo {
 
 endm -> end_api;
 
-# TODO manual separately?
-tw_export -> manual_dl -> exp_twitter_archives;
+
+subgraph exports {
+  node [shape=cylinder];
+
+  exp_twitter_archives;
+  exp_twitter;
+  exp_endomondo;
+}
+
+
 
 subgraph cluster_pipelines {
   label="Pipelines";
@@ -39,21 +48,39 @@ subgraph cluster_pipelines {
   color=brown;
 
   twexport;
+  endoexport;
 
-  tw_api  -> twexport   -> exp_twitter;
-  end_api -> endoexport -> exp_endomondo;
+  manual_dl[shape=invtrapezium];
+
+  tw_export -> manual_dl  -> exp_twitter_archives;
+  tw_api    -> twexport   -> exp_twitter;
+  end_api   -> endoexport -> exp_endomondo;
+
+  exp_twitter_archives           -> mypkg;
+  exp_twitter   -> dal_twitter   -> mypkg;
+  exp_endomondo -> dal_endomondo -> mypkg;
 }
 
-subgraph backups {
-  exp_twitter_archives -> borg;
-  exp_twitter          -> borg
-  exp_endomondo        -> borg;
-}
+# TODO distinguish manual and automatic nodes?
+# TODO instead have twexport on edges? ultimately not that much difference..
+
 # TODO position borg above
 
 # TODO svg output with links
-subgraph cluester_backups {
+subgraph cluster_backups {
+  label="Backups";
   borg;
+
+  exp_twitter_archives -> borg [style=dashed];
+  exp_twitter          -> borg [style=dashed];
+  exp_endomondo        -> borg [style=dashed];
+}
+
+# TODO mark edges that use cachew?
+
+subgraph cluster_orger {
+  label=Orger;
+  module_twitter;
 }
 
 subgraph cluster_ui {
@@ -61,8 +88,23 @@ subgraph cluster_ui {
   style=filled;
   color=pink;
 
+  emacs;
   browser;
 }
+
+mypkg -> timeline;
+mypkg -> dashboard;
+mypkg -> module_twitter -> twitter_org;
+mypkg -> promnesia;
+
+
+promnesia -> browser;
+timeline  -> browser;
+dashboard -> browser;
+
+
+twitter_org -> emacs;
+
 
 // a1 -> b3;
 // b2 -> a3;
