@@ -1,6 +1,10 @@
 # http://www.graphviz.org/content/cluster
 
 digraph G {
+  # https://stackoverflow.com/a/2012106/706389
+  compound=true;
+
+
   node [shape="box"];
   rankdir="LR";
 
@@ -40,39 +44,65 @@ subgraph cluster_kobo {
   kobo -> kobo_sqlite;
 }
 
+# TODO also could show how data gets _into_ the services, i.e. clients?
+subgraph cluster_instapaper {
+  label="Instapaper";
+  style=filled;
+  color=lightgray;
 
-subgraph exports {
-  node [shape=cylinder];
-
-  exp_kobo;
-  exp_twitter_archives;
-  exp_twitter;
-  exp_endomondo;
+  ip;
+  ip_api;
 }
+ip -> ip_api;
 
 
-
+# TODO hmm. how to still draw a frame around it?
 subgraph cluster_pipelines {
   label="Pipelines";
   style=filled;
   color=brown;
 
+  # meh
+  subgraph cluster_exports {
+    node [shape=cylinder];
+    label="Filesystem";
+    rank=same;
+    style=dashed;
+    color=black;
+
+    exp_kobo;
+    exp_twitter_archives;
+    exp_twitter;
+    exp_endomondo;
+    exp_instapaper;
+  }
+
+
   twexport;
   endoexport;
+  ipexport;
 
   manual_dl[shape=invtrapezium];
 
   tw_export   -> manual_dl  -> exp_twitter_archives;
   tw_api      -> twexport   -> exp_twitter;
+
   end_api     -> endoexport -> exp_endomondo;
+  ip_api      -> ipexport   -> exp_instapaper;
+
   kobo_sqlite -> kobuddy    -> exp_kobo;
 
-  exp_twitter_archives           -> mypkg;
-  exp_twitter   -> dal_twitter   -> mypkg;
-  exp_endomondo -> dal_endomondo -> mypkg;
-  exp_kobo      -> dal_kobuddy   -> mypkg;
+
+  exp_twitter_archives            -> mypkg;
+  exp_twitter    -> dal_twitter   -> mypkg;
+  exp_endomondo  -> dal_endomondo -> mypkg;
+  exp_instapaper -> dal_ip        -> mypkg;
+
+  exp_kobo       -> dal_kobuddy   -> mypkg;
 
 }
+# TODO mypkg is somewhat specific to my needs
+# TODO highlight that it's easy to hook to DAL 
 
 # TODO distinguish manual and automatic nodes?
 # TODO instead have twexport on edges? ultimately not that much difference..
@@ -82,13 +112,16 @@ subgraph cluster_pipelines {
 # TODO svg output with links
 subgraph cluster_backups {
   label="Backups";
+
   borg;
 
-  exp_kobo             -> borg [style=dashed];
-  exp_twitter_archives -> borg [style=dashed];
-  exp_twitter          -> borg [style=dashed];
-  exp_endomondo        -> borg [style=dashed];
+# exp_kobo             -> borg [style=dashed];
+# exp_twitter_archives -> borg [style=dashed];
+# exp_twitter          -> borg [style=dashed];
+# exp_endomondo        -> borg [style=dashed];
 }
+
+exp_twitter -> borg [ltail=cluster_exports];
 
 # TODO mark edges that use cachew?
 
@@ -96,12 +129,24 @@ subgraph cluster_orger {
   label=Orger;
   module_twitter;
   module_kobo;
+  module_instapaper;
+
+  module_kobo2org;
+  module_ip2org;
 }
 mypkg -> module_twitter;
 mypkg -> module_kobo;
+mypkg -> module_instapaper;
 
-module_twitter -> twitter_org;
-module_kobo    -> kobo_org;
+# TODO these are read only; contribute to search
+module_twitter    -> twitter_org;
+module_kobo       -> kobo_org;
+module_instapaper -> instapaper_org;
+
+module_kobo2org   -> org_agenda;
+module_ip2org     -> org_agenda;
+
+org_agenda -> emacs;
 
 # TODO cloudmacs?
 # TODO arctee
@@ -120,6 +165,7 @@ subgraph cluster_ui {
 
 mypkg -> timeline;
 
+mypkg -> dashboard [label="Calendar"];
 mypkg -> dashboard [label="Sleep data"];
 mypkg -> dashboard [label="Endomondo"];
 
@@ -142,7 +188,8 @@ dashboard -> browser;
 
 {
   kobo_org,
-  twitter_org
+  twitter_org,
+  instapaper_org
 } -> emacs;
 
 # TODO I guess it's nice to mention where I mention certain bits of infrastructure?
