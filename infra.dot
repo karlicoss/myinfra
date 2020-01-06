@@ -119,8 +119,20 @@ subgraph cluster_ui {
 }
 
 mypkg -> timeline;
-mypkg -> dashboard;
-mypkg -> promnesia;
+
+mypkg -> dashboard [label="Sleep data"];
+mypkg -> dashboard [label="Endomondo"];
+
+
+mypkg -> promnesia [label="FB messenger"];
+mypkg -> promnesia [label="hypothes.is" ];
+mypkg -> promnesia [label="Instapaper"  ];
+mypkg -> promnesia [label="org files"   ];
+mypkg -> promnesia [label="Pocket"      ];
+mypkg -> promnesia [label="Reddit"      ];
+# TODO show missing links? like HN
+mypkg -> promnesia [label="Telegram"    ];
+mypkg -> promnesia [label="Twitter"     ];
 
 
 promnesia -> browser;
@@ -128,8 +140,10 @@ timeline  -> browser;
 dashboard -> browser;
 
 
-kobo_org    -> emacs;
-twitter_org -> emacs;
+{
+  kobo_org,
+  twitter_org
+} -> emacs;
 
 # TODO I guess it's nice to mention where I mention certain bits of infrastructure?
 
