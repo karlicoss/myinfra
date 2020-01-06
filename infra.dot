@@ -10,30 +10,37 @@ digraph G {
   rankdir="LR";
 
 
+subgraph cluster_google {
+  label="Google";
+  style=filled;
+  color=orange;
+  // rankdir="TB";  // eh? not working..
+
+  "Google Location";
+  # TODO "timeline" can be treated as poor man's api??
+  "Google Location" -> "Takeout";
+}
+# TODO eh, these extra nodes are useles..
+
 subgraph cluster_twittercom {
 	label="Twitter";
 	style=filled;
 	color=lightblue;
 	// node [style=filled,color=white];
 
-  tw [label = "Twitter"];
   tw_export;
   tw_api;
 	// a0 -> a1 -> a2 -> a3;
 }
-tw -> tw_api;
-tw -> tw_export;
 
 subgraph cluster_endomondo {
 	label="Endomondo";
   style=filled;
   color=green;
-  endm;
   end_api;
 	// node [style=filled];
 	// b0 -> b1 -> b2 -> b3;
 }
-endm -> end_api;
 
 # TODO indicate frequencies?
 
@@ -41,8 +48,7 @@ subgraph cluster_kobo {
   label="Kobo reader";
   style=filled;
   color=gray;
-  kobo;
-  kobo -> kobo_sqlite;
+  kobo_sqlite;
 }
 
 # TODO also could show how data gets _into_ the services, i.e. clients?
@@ -51,10 +57,8 @@ subgraph cluster_instapaper {
   style=filled;
   color=lightgray;
 
-  ip;
   ip_api;
 }
-ip -> ip_api;
 
 
 # TODO hmm. how to still draw a frame around it?
@@ -63,6 +67,7 @@ subgraph cluster_pipelines {
   style=filled;
   color=brown;
 
+  # TODO more like 'cluster_fs'?
   # meh
   subgraph cluster_exports {
     node [shape=cylinder];
@@ -72,10 +77,16 @@ subgraph cluster_pipelines {
     color=black;
 
     exp_kobo;
+    exp_takeouts;
+    # TODO mention kython.ktakeout??
     exp_twitter_archives;
     exp_twitter;
     exp_endomondo;
     exp_instapaper;
+
+    data_weight;
+    data_blood;
+    # TODO mention manual inputs for these..
   }
 
 
@@ -83,9 +94,11 @@ subgraph cluster_pipelines {
   endoexport;
   ipexport;
 
-  manual_dl[shape=invtrapezium];
+  tw_manual[shape=invtrapezium];
+  takeout  [shape=invtrapezium];
 
-  tw_export   -> manual_dl  -> exp_twitter_archives;
+  "Takeout"   -> takeout    -> exp_takeouts;
+  tw_export   -> tw_manual  -> exp_twitter_archives;
   tw_api      -> twexport   -> exp_twitter;
 
   end_api     -> endoexport -> exp_endomondo;
@@ -94,14 +107,23 @@ subgraph cluster_pipelines {
   kobo_sqlite -> kobuddy    -> exp_kobo;
 
 
+  exp_takeouts                    -> mypkg [label="location data"];
   exp_twitter_archives            -> mypkg;
   exp_twitter    -> dal_twitter   -> mypkg;
   exp_endomondo  -> dal_endomondo -> mypkg;
   exp_instapaper -> dal_ip        -> mypkg;
 
   exp_kobo       -> dal_kobuddy   -> mypkg;
+  data_weight                     -> mypkg; # TODO mention orgparse
+  data_blood                      -> mypkg; # TODO mention orgparse
 
 }
+
+# TODO motivation for blood
+# I'm planning on tracking this for several decades, so providers will change
+
+# TODO could expand mypkg into separate files as well to demonstrate which data is consumed by what?
+
 # TODO mypkg is somewhat specific to my needs
 # TODO highlight that it's easy to hook to DAL 
 
@@ -109,6 +131,9 @@ subgraph cluster_pipelines {
 # TODO instead have twexport on edges? ultimately not that much difference..
 
 # TODO position borg above
+
+# TODO indicate stuff that is 'inactive' and not used anymore
+# TODO e.g. vk.com pipelines
 
 # TODO svg output with links
 subgraph cluster_backups {
@@ -172,17 +197,21 @@ mypkg -> ipython;
 mypkg -> timeline;
 
 mypkg -> dashboard [label="Calendar"];
-mypkg -> dashboard [label="Sleep data"];
-mypkg -> dashboard [label="Endomondo"];
+mypkg -> dashboard [label="Sleep"];
+mypkg -> dashboard [label="Exercise"];
+# TODO perhaps I need HR provider?
+mypkg -> dahsboard [label="Blood data"];
+mypkg -> dashboard [label="Weight"];
 
 
 promnesia [shape=star];
 
 
 mypkg -> promnesia [label="FB messenger"];
-mypkg -> promnesia [label="hypothes.is" ];
+exp_takeouts -> promnesia [label="Google Takeout"];
+mypkg -> promnesia [label="Hypothes.is" ];
 mypkg -> promnesia [label="Instapaper"  ];
-mypkg -> promnesia [label="org files"   ];
+mypkg -> promnesia [label="Org files"   ];
 mypkg -> promnesia [label="Pocket"      ];
 mypkg -> promnesia [label="Reddit"      ];
 # TODO show missing links? like HN
@@ -207,6 +236,7 @@ dashboard -> browser;
 # TODO position below all
 
 subgraph cluster_blog {
+  label="Blog posts";
   blog_hb_kcals [
     label="Making sense of Endomondo's calorie estimation";
     URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
@@ -216,14 +246,16 @@ subgraph cluster_blog {
     URL="https://beepb00p.xyz/mypkg.html";
   ];
   blog_orger;
+  blog_takeout_data_gone;
 }
 # TODO https://beepb00p.xyz/takeout-data-gone.html
 
 # TODO use different line styles...
 # TODO pipelines could link to sad state
 orger_point -> blog_orger;
-mypkg -> blog_hb_kcals;
-mypkg -> blog_mypkg;
+mypkg       -> blog_hb_kcals;
+mypkg       -> blog_mypkg;
+takeout     -> blog_takeout_data_gone;
 // 
 
 }
