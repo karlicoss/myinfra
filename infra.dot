@@ -4,6 +4,7 @@ digraph G {
   # https://stackoverflow.com/a/2012106/706389
   compound=true;
 
+  // concatenate=true; // eh, doesn't seem to work..
 
   node [shape="box"];
   rankdir="LR";
@@ -133,6 +134,8 @@ subgraph cluster_orger {
 
   module_kobo2org;
   module_ip2org;
+
+  orger_point [shape=point];
 }
 mypkg -> module_twitter;
 mypkg -> module_kobo;
@@ -161,13 +164,19 @@ subgraph cluster_ui {
 
   emacs;
   browser;
+  ipython;
 }
+
+mypkg -> ipython;
 
 mypkg -> timeline;
 
 mypkg -> dashboard [label="Calendar"];
 mypkg -> dashboard [label="Sleep data"];
 mypkg -> dashboard [label="Endomondo"];
+
+
+promnesia [shape=star];
 
 
 mypkg -> promnesia [label="FB messenger"];
@@ -198,13 +207,23 @@ dashboard -> browser;
 # TODO position below all
 
 subgraph cluster_blog {
-  hb_kcals [
+  blog_hb_kcals [
     label="Making sense of Endomondo's calorie estimation";
     URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
   ];
+  blog_mypkg [
+    label="my. package";
+    URL="https://beepb00p.xyz/mypkg.html";
+  ];
+  blog_orger;
 }
+# TODO https://beepb00p.xyz/takeout-data-gone.html
 
-mypkg -> hb_kcals;
+# TODO use different line styles...
+# TODO pipelines could link to sad state
+orger_point -> blog_orger;
+mypkg -> blog_hb_kcals;
+mypkg -> blog_mypkg;
 // 
 
 }
