@@ -105,6 +105,9 @@ module_kobo    -> kobo_org;
 
 # TODO cloudmacs?
 # TODO arctee
+# TODO link some of my blog posts? E.g. ones using endomondo
+
+
 
 subgraph cluster_ui {
   label="User interfaces";
@@ -128,12 +131,19 @@ dashboard -> browser;
 kobo_org    -> emacs;
 twitter_org -> emacs;
 
+# TODO I guess it's nice to mention where I mention certain bits of infrastructure?
 
-// a1 -> b3;
-// b2 -> a3;
-// a3 -> a0;
-// a3 -> end;
-// b3 -> end;
+# TODO style blog posts differently?
+# TODO position below all
 
-// end [shape=Mdiamond];
+subgraph cluster_blog {
+  hb_kcals [
+    label="Making sense of Endomondo's calorie estimation";
+    URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
+  ];
+}
+
+mypkg -> hb_kcals;
+// 
+
 }
