@@ -1,4 +1,7 @@
 # http://www.graphviz.org/content/cluster
+# TODO https://www.graphviz.org/doc/info/colors.html
+// https://www.rff.com/flowchart_shapes.php
+// https://www.graphviz.org/doc/info/shapes.html
 
 digraph G {
   # https://stackoverflow.com/a/2012106/706389
@@ -10,9 +13,22 @@ digraph G {
   rankdir="LR";
 
 
+subgraph cluster_phone {
+  label="Phone";
+  node [shape=point];
+
+  gps;
+
+  app_endomondo;
+  app_bluemaestro;
+  app_jawbone;
+  // phone;
+}
+
+
 subgraph cluster_google {
   label="Google";
-  style=filled;
+  style="dashed,rounded";
   color=orange;
   // rankdir="TB";  // eh? not working..
 
@@ -20,54 +36,98 @@ subgraph cluster_google {
   # TODO "timeline" can be treated as poor man's api??
   "Google Location" -> "Takeout";
 }
+
+gps -> "Google Location";
+
+# TODO distinguish 'device' and 'service'; display legend
+
+# Demonstrates how much indirection is there if you want to own your data
+
+
 # TODO eh, these extra nodes are useles..
 
 subgraph cluster_twittercom {
 	label="Twitter";
-	style=filled;
+	style="dashed,rounded";
 	color=lightblue;
 	// node [style=filled,color=white];
 
   tw_export;
-  tw_api;
+  tw_api [label=API];
 	// a0 -> a1 -> a2 -> a3;
 }
 
+// TODO phone location data
+// subgraph cluster_wahoo {
+//   label="Wahoo";
+//   style=filled;
+wahoo [label="Wahoo\n(HR monitor)"];
+// }
+
+
+wahoo -> app_endomondo [label=bluetooth];
+
+
+jawbone [label="Jawbone\n(sleep tracker)"];
+
+jawbone -> app_jawbone [label=bluetooth];
+
+// subgraph cluster_bluemaestro {
+//   label="Bluemaestro";
+//   style=filled;
+//   bluemaestro;
+// }
+// TODO links?
+bluemaestro [label="Bluemaestro\n(environment\nsensor)"];
+
+bluemaestro -> app_bluemaestro [label=bluetooth];
+// TODO pehraps need arrows _through_ phone. e.g. via invisible dots or something
+
 subgraph cluster_endomondo {
 	label="Endomondo";
-  style=filled;
+  style="dashed,rounded";
   color=green;
-  end_api;
+  end_api [label=API];
 	// node [style=filled];
 	// b0 -> b1 -> b2 -> b3;
 }
 
+app_endomondo -> end_api; // TODO
+
+// TODO jawbone device? (useless?)
+
 # TODO indicate frequencies?
+
+// TODO kindle (unused)
 
 subgraph cluster_kobo {
   label="Kobo reader";
   style=filled;
   color=gray;
-  kobo_sqlite;
+  kobo_sqlite [label=sqlite];
 }
 
 # TODO also could show how data gets _into_ the services, i.e. clients?
 subgraph cluster_instapaper {
   label="Instapaper";
-  style=filled;
+  style="dashed,rounded";
   color=lightgray;
 
-  ip_api;
+  ip_api [label=API];
 }
 
 # TODO demonstrate that it's dead
 subgraph cluster_jawbone {
   label="Jawbone\n(dead)";
-  style=filled;
+  style="dashed,rounded";
   color=orange;
 
-  jb_api;
+  jb_api [label=API];
 }
+
+
+app_jawbone -> jb_api;
+
 
 subgraph cluster_emfit {
   label="Emfit";
@@ -83,7 +143,6 @@ subgraph cluster_pipelines {
   label="Pipelines";
   style=filled;
   color=coral;
-  # TODO https://www.graphviz.org/doc/info/colors.html
 
   # TODO more like 'cluster_fs'?
   # meh
@@ -115,7 +174,7 @@ subgraph cluster_pipelines {
   twexport;
   endoexport;
   ipexport;
-  jbexport [shape=cds];
+  jbexport [shape=cds]; // TODO cross out maybe?
   # TODO eh, figure out better shape for 'dead'
   # TODO perhaps makes more sense to mark edge?
 
@@ -250,7 +309,6 @@ mypkg -> dashboard [label="Weight"];
 # TODO distinguish regular manual tasks and 'only once' manual tasks
 # perhaps highlight regular manual with red
 # TODO kobo -- semi manual?
-# https://www.graphviz.org/doc/info/shapes.html
 
 promnesia [shape=star];
 
