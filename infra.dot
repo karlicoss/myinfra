@@ -3,6 +3,9 @@
 // https://www.rff.com/flowchart_shapes.php
 // https://www.graphviz.org/doc/info/shapes.html
 
+
+# echo 'infra.dot' | entr dot -T svg infra.dot -o infra.svg
+
 digraph G {
   # https://stackoverflow.com/a/2012106/706389
   compound=true;
@@ -10,7 +13,11 @@ digraph G {
   // concatenate=true; // eh, doesn't seem to work..
 
   node [shape="box"];
-  rankdir="LR";
+  // rankdir="LR";
+
+  rank=max; // TODO eh?
+
+  // TODO not sure which rang to choose?
 
 
 subgraph cluster_phone {
@@ -57,13 +64,25 @@ subgraph cluster_twittercom {
 	// a0 -> a1 -> a2 -> a3;
 }
 
+
+subgraph cluster_vkcom {
+  label="VK.com";
+  style="dashed,rounded";
+
+  vk_api [label=API];
+}
+
+// TODO trivial connections (e.g. twitter phone app -> twitter are omitted)
+// TODO should they be though?
+
+
+
 // TODO phone location data
 // subgraph cluster_wahoo {
 //   label="Wahoo";
 //   style=filled;
 wahoo [label="Wahoo\n(HR monitor)"];
 // }
-
 
 wahoo -> app_endomondo [label=bluetooth];
 
@@ -130,13 +149,29 @@ app_jawbone -> jb_api;
 
 
 subgraph cluster_emfit {
-  label="Emfit";
+  label="Emfit\n(sleep tracker)";
   style=filled;
   color=grey;
 
-  emfit_wifi; # TODO
-  emfit_api;
+
+  // TODO dot?
+  emfit [shape=point];
+
+  emfit_wifi [label="wifi\n(local API))"];
 }
+
+
+subgraph cluster_emfit_cloud {
+  label="Emfit";
+  style="dashed,rounded";
+  emfit_api [label="API"];
+}
+
+emfit -> emfit_api [label=internet];
+
+// TODO if I draw an edge from UI to phone.... gonna be fun
+
+
 
 # TODO hmm. how to still draw a frame around it?
 subgraph cluster_pipelines {
@@ -161,6 +196,7 @@ subgraph cluster_pipelines {
 
     exp_emfit;
     exp_twitter;
+    exp_vk;
 
     exp_endomondo;
     exp_instapaper;
@@ -168,13 +204,20 @@ subgraph cluster_pipelines {
     data_weight;
     data_blood;
     # TODO mention manual inputs for these..
+
+    exp_bluemaestro;
+
+    exp_point [shape=point];
   }
 
 
   twexport;
   endoexport;
   ipexport;
+
   jbexport [shape=cds]; // TODO cross out maybe?
+  vkexport [shape=cds];
+
   # TODO eh, figure out better shape for 'dead'
   # TODO perhaps makes more sense to mark edge?
 
@@ -184,6 +227,7 @@ subgraph cluster_pipelines {
   "Takeout"   -> takeout     -> exp_takeouts;
   tw_export   -> tw_manual   -> exp_twitter_archives;
   tw_api      -> twexport    -> exp_twitter;
+  vk_api      -> vkexport    -> exp_vk;
   jb_api      -> jbexport    -> exp_jawbone;
   emfit_api   -> emfitexport -> exp_emfit;
 
@@ -191,6 +235,8 @@ subgraph cluster_pipelines {
   ip_api      -> ipexport   -> exp_instapaper;
 
   kobo_sqlite -> kobuddy    -> exp_kobo;
+
+  app_bluemaestro -> exp_bluemaestro [label=syncthing];
 
 
   mypkg;
@@ -212,6 +258,7 @@ subgraph cluster_pipelines {
   # so there is still something to work on
 
 
+  exp_vk                          -> mypkg;
   exp_twitter    -> dal_twitter   -> mypkg;
   exp_endomondo  -> dal_endomondo -> mypkg;
   exp_instapaper -> dal_ip        -> mypkg;
@@ -221,6 +268,10 @@ subgraph cluster_pipelines {
   data_blood                      -> mypkg; # TODO mention orgparse
 
 }
+
+// TODO browser history?
+
+# TODO display google home and mention how useless it is
 
 # TODO motivation for blood
 # I'm planning on tracking this for several decades, so providers will change
@@ -250,7 +301,7 @@ subgraph cluster_backups {
 # exp_endomondo        -> borg [style=dashed];
 }
 
-exp_twitter -> borg [ltail=cluster_exports];
+exp_point -> borg [ltail=cluster_exports];
 
 # TODO mark edges that use cachew?
 
@@ -323,6 +374,7 @@ mypkg -> promnesia [label="Reddit"      ];
 # TODO show missing links? like HN
 mypkg -> promnesia [label="Telegram"    ];
 mypkg -> promnesia [label="Twitter"     ];
+mypkg -> promnesia [label="VK"          ];
 
 
 promnesia -> browser;
