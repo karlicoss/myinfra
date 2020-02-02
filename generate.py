@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, NamedTuple, Optional, Sequence, Union
+from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union
 
 
 Data = Union[str, Iterable[str]]
@@ -11,7 +11,7 @@ class Cluster(NamedTuple):
     name: Optional[str]=None
 
     def render(self, name: Optional[str]=None) -> Iterable[str]: # TODO list str?
-        assert (self.name is None) ^ (name is None)
+        assert self.name == name or (self.name is None) ^ (name is None)
         name = self.name or name # meh
         yield f'subgraph cluster_{name}' + ' {'
         for x in [self.raw] if isinstance(self.raw, str) else self.raw:
@@ -85,8 +85,16 @@ def url(u: str) -> Extra:
 Renderable = Cluster
 
 
-def collect(d: Dict) -> Iterator[str]:
+def collect(x: Union[Dict, List]) -> Iterator[str]:
     # TODO collect all globals?
+    d: Dict
+    if isinstance(x, list):
+        # TODO ok, it's a bit horrible...
+        # TODO just use this logic in def name or something?
+        gl = {id(v): k for k, v in globals().items()}
+        d = {gl[id(o)]: o for o in x}
+    else:
+        d = x
     for k, v in d.items():
         if isinstance(v, Cluster):
             # TODO name??
@@ -95,7 +103,21 @@ def collect(d: Dict) -> Iterator[str]:
 
 
 def generate() -> str:
-    return '\n'.join(collect(d=globals()))
+    misc = [
+        phone,
+        telegram,
+        vkcom,
+        google,
+        twittercom,
+        endomondo,
+        instapaper,
+        emfit_cloud,
+        jawbone,
+        devices,
+        emfit,
+        kobo,
+    ]
+    return '\n'.join(collect(misc))
 
 
 def gh(x: str) -> str:
@@ -145,33 +167,30 @@ emfitexport = node(
     **url(gh('karlicoss/backup-emfit')),
 )
 
-def generate_pipelines() -> str:
-    sc = cluster(
+
+scripts = cluster(
 '''
     // style=dashed;
-
     tw_manual[shape=invtrapezium];
     twexport;
 ''',
-        vkexport,
-        tgbackup,
-        endoexport,
-        ipexport,
+    vkexport,
+    tgbackup,
+    endoexport,
+    ipexport,
 '''
-
     jbexport [shape=cds]; // TODO cross out maybe?
 
     takeout  [shape=invtrapezium];
 ''',
-        kobuddy,
-        emfitexport,
-        label='Export scripts',
-        style=dashed,
-    )
-    d = {
-        'scripts': sc,
-    }
-    return '\n'.join(collect(d=d))
+    kobuddy,
+    emfitexport,
+    label='Export scripts',
+    style=dashed,
+)
+
+def generate_pipelines() -> str:
+    return '\n'.join(collect([scripts]))
 
 
 def generate_post() -> str:
@@ -206,7 +225,7 @@ def generate_post() -> str:
     d = {
         'blog': blog,
     }
-    return '\n'.join(collect(d=d))
+    return '\n'.join(collect(d))
 
 
 filled = 'filled'
@@ -334,30 +353,27 @@ jawbone = cluster(
     label='Jawbone\n(dead)',
 )
 
-def emfit():
-    return cluster(
-        # TODO dot?
-        '''
-    emfit [shape=point];
-    emfit_wifi [label="wifi\n(local API)"];
-        ''',
-        # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
-        url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
-        DEVICE,
-        name='emfit',
-        label='Emfit\n(sleep tracker)',
-    )
+emfit = cluster(
+    # TODO dot?
+    '''
+emfit [shape=point];
+emfit_wifi [label="wifi\n(local API)"];
+    ''',
+    # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
+    url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
+    DEVICE,
+    name='emfit',
+    label='Emfit\n(sleep tracker)',
+)
 
 
-# TODO not so sure about automatic collection. makes it a bit tricky..
-def kobo():
-    return cluster(
-        'kobo_sqlite [label=sqlite]',
-        url('https://us.kobobooks.com/products/kobo-aura-one-limited-edition'),
-        DEVICE,
-        name='kobo',
-        label='Kobo reader',
-    )
+kobo = cluster(
+    'kobo_sqlite [label=sqlite]',
+    url('https://us.kobobooks.com/products/kobo-aura-one-limited-edition'),
+    DEVICE,
+    name='kobo',
+    label='Kobo reader',
+)
 
 wahoo = node(
     name='wahoo',
@@ -383,8 +399,8 @@ devices = cluster(
     wahoo,
     jawbone_band,
     bluemaestro,
-    *emfit().render(),
-    *kobo().render(),
+    *emfit.render(),
+    *kobo.render(),
     label='Devices',
 )
 
