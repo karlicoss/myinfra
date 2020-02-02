@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, NamedTuple, Optional, Union
+from typing import Dict, Iterable, Iterator, NamedTuple, Optional, Sequence, Union
 
 
 Data = Union[str, Iterable[str]]
@@ -17,18 +17,7 @@ class Cluster(NamedTuple):
         yield '}'
 
 
-def _render(*args: str, **kwargs):
-    return list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
-
-
-def cluster(*args: str, **kwargs) -> Cluster:
-    res = _render(*args, **kwargs)
-    return Cluster(raw=res)
-
-
 Extra = Dict[str, str]
-
-
 class Node(NamedTuple):
     name: str
     extra: Dict
@@ -43,6 +32,29 @@ class Node(NamedTuple):
         for l in _render(**extra):
             yield '  ' + l
         yield ']'
+
+
+def _render(*args: str, **kwargs):
+    return list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
+
+
+ClusterItem = Union[str, Dict, Node]
+def cluster(*args: ClusterItem, **kwargs) -> Cluster:
+    kw = {**kwargs}
+    def it() -> Iterable[str]:
+        for x in args:
+            if isinstance(x, str):
+                yield x
+            elif isinstance(x, dict):
+                # TODO a bit horrible..
+                kw.update(x)
+            elif isinstance(x, Node):
+                yield from x.render()
+            else:
+                raise RuntimeError(x)
+    ag: Sequence[str] = list(it())
+    res = _render(*ag, **kw)
+    return Cluster(raw=res)
 
 
 def node(name: str, **kwargs) -> Node:
@@ -132,17 +144,17 @@ def generate_pipelines() -> str:
     tw_manual[shape=invtrapezium];
     twexport;
 ''',
-        *vkexport.render(),
-        *tgbackup.render(),
-        *endoexport.render(),
-        *ipexport.render(),
+        vkexport,
+        tgbackup,
+        endoexport,
+        ipexport,
 '''
 
     jbexport [shape=cds]; // TODO cross out maybe?
 
     takeout  [shape=invtrapezium];
 ''',
-        *kobuddy.render(),
+        kobuddy,
         'emfitexport',
         label='Export scripts',
         style=dashed,
@@ -160,7 +172,10 @@ green = 'green'
 orange = 'orange'
 
 
-CLOUD = 'style="dashed,rounded";';
+CLOUD = {
+    'style': 'dashed,rounded',
+}
+
 DEVICE = {
     'style': filled,
     'color': gray,
@@ -173,8 +188,8 @@ telegram = cluster(
 tg_api [label=API];
 ''',
     CLOUD,
+    url('https://telegram.org'),
     label='Telegram',
-    **url('https://telegram.org'),
 )
 
 
@@ -183,8 +198,8 @@ vkcom = cluster(
 vk_api [label=API];
 ''',
     CLOUD,
+    url('https://vk.com'),
     label='VK.com',
-    **url('https://vk.com'),
 )
 
 google_loc = node('Google Location') # TODO enclose in quotes if necessary?
@@ -193,8 +208,8 @@ takeout = node('Takeout', **url('https://takeout.google.com'))
 # TODO "timeline" can be treated as poor man's api??
 google = cluster(
     # TODO make rendering automatic?
-    *google_loc.render(),
-    *takeout.render(),
+    google_loc,
+    takeout,
     edge(google_loc, takeout), # TODO something more dsly like multiplication?
     CLOUD,
     color=orange,
@@ -212,8 +227,8 @@ tw_archive = node(
 # TODO map manual steps without intermediate nodes?
 
 twittercom = cluster(
-    *tw_api.render(),
-    *tw_archive.render(),
+    tw_api,
+    tw_archive,
     CLOUD,
     color='lightblue',
     label='Twitter',
@@ -222,15 +237,15 @@ twittercom = cluster(
 endomondo = cluster(
     'end_api [label=API]',
     CLOUD,
-    **url('https://www.endomondo.com'),
+    url('https://www.endomondo.com'),
     color=green,
     label='Endomondo',
 )
 
 kobo = cluster(
     'kobo_sqlite [label=sqlite]',
-    **url('https://www.kobo.com'),
-    **DEVICE,
+    url('https://us.kobobooks.com/products/kobo-aura-one-limited-edition'),
+    DEVICE,
     label='Kobo reader',
 )
 
@@ -239,7 +254,7 @@ kobo = cluster(
 instapaper = cluster(
     'ip_api [label=API]',
     CLOUD,
-    **url('https://www.instapaper.com'),
+    url('https://www.instapaper.com'),
     color='lightgray',
     label='Instapaper',
 )
@@ -251,8 +266,8 @@ emfit [shape=point];
 emfit_wifi [label="wifi\n(local API))"];
     ''',
     # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
-    **url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
-    **DEVICE,
+    url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
+    DEVICE,
     label='Emfit\n(sleep tracker)',
 )
 
