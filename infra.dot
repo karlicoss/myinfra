@@ -12,12 +12,15 @@ digraph G {
   # https://stackoverflow.com/a/2012106/706389
   compound=true;
 
+  // ok, newrank doesn't respect clusters..
+
   // concatenate=true; // eh, doesn't seem to work..
 
   node [shape="box"];
   // rankdir="LR";
 
-  rank=max; // TODO eh?
+  // hmm. used to have this as 'max', but same works a bit neater..
+  rank=same;
 
   // TODO not sure which rang to choose?
 
@@ -54,6 +57,12 @@ gps -> "Google Location";
 
 
 # TODO eh, these extra nodes are useles..
+subgraph cluster_telegram {
+  label="Telegram";
+  style="dashed,rounded";
+
+  tg_api [label=API];
+}
 
 subgraph cluster_twittercom {
 	label="Twitter";
@@ -74,12 +83,6 @@ subgraph cluster_vkcom {
   vk_api [label=API];
 }
 
-subgraph cluster_telegram {
-  label="Telegram";
-  style="dashed,rounded";
-
-  tg_api [label=API];
-}
 
 // TODO trivial connections (e.g. twitter phone app -> twitter are omitted)
 // TODO should they be though?
@@ -144,6 +147,8 @@ subgraph cluster_instapaper {
   ip_api [label=API];
 }
 
+# TODO mark ones that are running periodically?
+
 # TODO demonstrate that it's dead
 subgraph cluster_jawbone {
   label="Jawbone\n(dead)";
@@ -196,9 +201,13 @@ subgraph cluster_pipelines {
   subgraph cluster_exports {
     node [shape=cylinder];
     label="Filesystem";
-    rank=same;
+    // rankdir=LR;
     style=dashed;
     color=black;
+
+    // exp_point [shape=point]; // TODO ughhh. why is everything so hard
+
+    exp_telegram;
 
     exp_jawbone;
     exp_kobo;
@@ -207,7 +216,6 @@ subgraph cluster_pipelines {
     exp_twitter_archives;
 
     exp_emfit;
-    exp_telegram;
     exp_twitter;
     exp_vk;
 
@@ -220,21 +228,33 @@ subgraph cluster_pipelines {
 
     exp_bluemaestro;
 
-    exp_point [shape=point];
+    // exp_point -> exp_telegram [style=dashed, constraint=false];
+    // exp_point -> exp_jawbone  [style=dashed, constraint=false];
   }
 
-  twexport;
-  endoexport;
-  ipexport;
+  subgraph cluster_scripts {
+    label="Export scripts";
+    rank=same;
+    style=dashed;
 
-  jbexport [shape=cds]; // TODO cross out maybe?
-  vkexport [shape=cds];
+    tw_manual[shape=invtrapezium];
+    twexport;
+
+    vkexport [shape=cds];
+
+    tgbackup;
+
+    endoexport;
+    ipexport;
+
+    jbexport [shape=cds]; // TODO cross out maybe?
+
+    takeout  [shape=invtrapezium];
+  }
 
   # TODO eh, figure out better shape for 'dead'
   # TODO perhaps makes more sense to mark edge?
 
-  tw_manual[shape=invtrapezium];
-  takeout  [shape=invtrapezium];
 
   "Takeout"   -> takeout     -> exp_takeouts;
   tw_export   -> tw_manual   -> exp_twitter_archives;
@@ -425,8 +445,14 @@ dashboard -> browser;
 # TODO style blog posts differently?
 # TODO position below all
 
+# TODO separate layer for inputs? e.g. browser/phone etc
+
 subgraph cluster_blog {
+  // TODO decluser and don't participate in constraints?
+
   label="Blog posts";
+  edge [style=dashed]; 
+
   blog_hb_kcals [
     label="Making sense of Endomondo's calorie estimation";
     URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
@@ -437,15 +463,16 @@ subgraph cluster_blog {
   ];
   blog_orger;
   blog_takeout_data_gone;
+
+
+  // TODO pipelines could link to sad state
+  orger_point -> blog_orger;
+  mypkg       -> blog_hb_kcals;
+  mypkg       -> blog_mypkg;
+  takeout     -> blog_takeout_data_gone;
 }
 # TODO https://beepb00p.xyz/takeout-data-gone.html
 
-# TODO use different line styles...
-# TODO pipelines could link to sad state
-orger_point -> blog_orger;
-mypkg       -> blog_hb_kcals;
-mypkg       -> blog_mypkg;
-takeout     -> blog_takeout_data_gone;
 // 
 
 // TODO right. I think I need to add browser history and that's it. publish straigh away after that
