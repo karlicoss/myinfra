@@ -122,6 +122,11 @@ ipexport = node(
     **url(gh('karlicoss/instapexport')),
 )
 
+kobuddy = node(
+    name='kobuddy',
+    **url(gh('karlicoss/kobuddy')),
+)
+
 def generate_pipelines() -> str:
     sc = cluster(
 '''
@@ -140,6 +145,7 @@ def generate_pipelines() -> str:
 
     takeout  [shape=invtrapezium];
 ''',
+        *kobuddy.render(),
         label='Export scripts',
         style=dashed,
     )
@@ -186,11 +192,22 @@ google = cluster(
 #   // rankdir="TB";  // eh? not working..
 )
 
-# pipelines = cluster(
-#     label='Pipelines',
-#     color='coral',
-#     style='filled',
-# )
+tw_api = node(name='tw_api', label='API')
+tw_archive = node(
+    name='tw_archive',
+    label='Twitter Archive',
+    **url('https://help.twitter.com/en/managing-your-account/how-to-download-your-twitter-archive'),
+)
+
+# TODO map manual steps without intermediate nodes?
+
+twittercom = cluster(
+    *tw_api.render(),
+    *tw_archive.render(),
+    CLOUD,
+    color='lightblue',
+    label='Twitter',
+)
 
 
 def main():
