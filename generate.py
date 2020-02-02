@@ -177,7 +177,7 @@ def blog_post(link: str, *args, **kwargs) -> Node:
 # TODO FIXME blog edge
 blog_orger = blog_post(
     'https://beepb00p.xyz/orger.html',
-    label='Orger: plaintex reflextion\nof your digital self',
+    label='Orger: plaintext reflection\nof your digital self',
     # constraint='false', # TODO # eh?
 )
 
@@ -204,10 +204,31 @@ module_ip2org;
 module_kobo2org -> module_ip2org;
     ''',
     blog_orger,
+    'blog_orger -> module_twitter [style=invis]',
     edge(orger_point, blog_orger, **BLOG_EDGE),
     url(gh('karlicoss/orger')),
     label='Orger',
 )
+
+# TODO these three are same level as orger?
+dashboard = node(
+    **url('https://beepb00p.xyz/my-data.html#dashboard'),
+    label='Dashboard',
+    shape=star,
+)
+
+
+timeline = node(
+    label='Timeline',
+    shape=star,
+)
+
+promnesia = node(
+    **url(gh('karlicoss/promnesia')),
+    label='Promnesia',
+    shape=star,
+)
+
 
 def generate() -> str:
     items = [
@@ -223,7 +244,13 @@ def generate() -> str:
         devices,
         emfit,
         kobo,
+
         orger,
+        '{',
+        dashboard,
+        timeline,
+        promnesia,
+        '}',
     ]
     return '\n'.join(map(render, items))
 
