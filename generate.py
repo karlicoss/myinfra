@@ -136,6 +136,12 @@ kobuddy = node(
     **url(gh('karlicoss/kobuddy')),
 )
 
+# TODO use __name__?
+emfitexport = node(
+    name='emfitexport',
+    **url(gh('karlicoss/backup-emfit')),
+)
+
 def generate_pipelines() -> str:
     sc = cluster(
 '''
@@ -155,7 +161,7 @@ def generate_pipelines() -> str:
     takeout  [shape=invtrapezium];
 ''',
         kobuddy,
-        'emfitexport',
+        emfitexport,
         label='Export scripts',
         style=dashed,
     )
@@ -170,10 +176,16 @@ filled = 'filled'
 gray = 'gray'
 green = 'green'
 orange = 'orange'
+red = 'red'
 
 
 CLOUD = {
     'style': 'dashed,rounded',
+}
+
+DEAD = {
+    'style': filled, # TODO need to apaned to styles?
+    'color': red, # TODO not sure. looks bit too bright..
 }
 
 DEVICE = {
@@ -255,7 +267,7 @@ instapaper = cluster(
     'ip_api [label=API]',
     CLOUD,
     url('https://www.instapaper.com'),
-    color='lightgray',
+    color='lightgray', # TODO for other as well?
     label='Instapaper',
 )
 
@@ -263,7 +275,7 @@ emfit = cluster(
     # TODO dot?
     '''
 emfit [shape=point];
-emfit_wifi [label="wifi\n(local API))"];
+emfit_wifi [label="wifi\n(local API)"];
     ''',
     # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
     url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
@@ -277,6 +289,18 @@ emfit_cloud = cluster(
     CLOUD,
     label='Emfit',
 )
+
+# TODO demonstrate that it's dead
+# TODO not sure. wedged? striped? invert colors?
+jawbone = cluster(
+    'jb_api [label=API]',
+    CLOUD,
+    DEAD,
+    **url('https://en.wikipedia.org/wiki/Jawbone_(company)#UP24'),
+    color=orange,
+    label='Jawbone\n(dead)',
+)
+
 
 
 
