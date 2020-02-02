@@ -4,9 +4,6 @@ from pathlib import Path
 from typing import Dict, Iterable, Iterator, NamedTuple, Optional, Union
 
 
-CLOUD = 'style="dashed,rounded";';
-
-
 Data = Union[str, Iterable[str]]
 
 class Cluster(NamedTuple):
@@ -154,6 +151,21 @@ def generate_pipelines() -> str:
     }
     return '\n'.join(collect(d=d))
 
+
+filled = 'filled'
+
+gray = 'gray'
+green = 'green'
+orange = 'orange'
+
+
+CLOUD = 'style="dashed,rounded";';
+DEVICE = {
+    'style': filled,
+    'color': gray,
+}
+
+
 # TODO eh, these extra nodes are useles..
 telegram = cluster(
 '''
@@ -173,9 +185,6 @@ vk_api [label=API];
     label='VK.com',
     **url('https://vk.com'),
 )
-
-
-orange = 'orange'
 
 google_loc = node('Google Location') # TODO enclose in quotes if necessary?
 takeout = node('Takeout', **url('https://takeout.google.com'))
@@ -207,6 +216,31 @@ twittercom = cluster(
     CLOUD,
     color='lightblue',
     label='Twitter',
+)
+
+endomondo = cluster(
+    'end_api [label=API]',
+    CLOUD,
+    **url('https://www.endomondo.com'),
+    color=green,
+    label='Endomondo',
+)
+
+kobo = cluster(
+    'kobo_sqlite [label=sqlite]',
+    **url('https://www.kobo.com'),
+    **DEVICE,
+    label='Kobo reader',
+)
+
+# TODO also could show how data gets _into_ the services, i.e. clients?
+
+instapaper = cluster(
+    'ip_api [label=API]',
+    CLOUD,
+    **url('https://www.instapaper.com'),
+    color='lightgray',
+    label='Instapaper',
 )
 
 
