@@ -98,8 +98,9 @@ def node(name: Optional[str]=None, **kwargs) -> Node:
 
 
 Edge = str
-def edge(f: Node, t: Node) -> Edge:
-    return f'{f.name} -> {t.name}'
+def edge(f: Node, t: Node, **kwargs) -> Edge:
+    extras = '' if len(kwargs) == 0 else ' [' + '\n'.join(_render(**kwargs)) + ']'
+    return f'{f.name} -> {t.name}' + extras
 
 blue = 'blue'
 dashed = 'dashed'
@@ -141,8 +142,18 @@ DEVICE = {
 }
 
 
+BLOG_EDGE = {
+    'color': blue,
+    'style': dashed,
+    'arrowhead': 'none',
+}
+
+
 def render(x):
-    return '\n'.join(x.render())
+    if isinstance(x, str):
+        return x
+    else:
+        return '\n'.join(x.render())
 
 
 def generate() -> str:
@@ -281,46 +292,56 @@ mypkg = node(
     shape=star,
 )
 
+blog_mypkg = node(
+    **url('https://beepb00p.xyz/mypkg.html'),
+    label='my. package:\nPython interface to my life',
+)
+
+# TODO color arrows all the way through? so it's possible to trace how data propagates
+
+
+blog_hb_kcals = node(
+    **url('https://beepb00p.xyz/heartbeats_vs_kcals.html'),
+    label="Making sense of\nEndomondo's calorie estimation",
+)
+
 def generate_pipelines() -> str:
     items = [
+        '{',
         mypkg,
+        blog_mypkg,
+        edge(mypkg, blog_mypkg   , **BLOG_EDGE),
+        blog_hb_kcals,
+        edge(mypkg, blog_hb_kcals, **BLOG_EDGE),
+        '}',
+
         scripts,
         exports,
         dals,
     ]
     return '\n'.join(map(render, items))
 
+
 blog = cluster(
     '''
 edge [style=dashed]; 
 
-blog_hb_kcals [
-    label="Making sense of Endomondo's calorie estimation";
-    URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
-];
-blog_mypkg [
-    label="my. package";
-    URL="https://beepb00p.xyz/mypkg.html";
-];
 blog_orger;
-blog_takeout_data_gone;
 
 
 // TODO pipelines could link to sad state
 orger_point -> blog_orger;
-mypkg       -> blog_hb_kcals;
-mypkg       -> blog_mypkg;
-takeout     -> blog_takeout_data_gone;
     ''',
     label='Blog posts',
 )
-# TODO https://beepb00p.xyz/takeout-data-gone.html
+# TODO 
 # TODO decluser and don't participate in constraints?
 
 def generate_post() -> str:
-
-    clusters = [blog]
-    return '\n'.join(map(render, clusters))
+    items = [
+        blog,
+    ]
+    return '\n'.join(map(render, items))
 
 
 phone = cluster(
@@ -366,12 +387,25 @@ takeout = node(
     **url('https://takeout.google.com'),
 )
 
+
+blog_takeout_data_gone = node(
+    **url('https://beepb00p.xyz/takeout-data-gone.html'),
+    label="Google Takeouts silently\nremoves old data",
+)
+
 # TODO "timeline" can be treated as poor man's api??
 google = cluster(
     # TODO make rendering automatic?
     google_loc,
-    takeout,
     edge(google_loc, takeout), # TODO something more dsly like multiplication?
+
+    # omg, I'm so happy it works so simply
+    '{',
+    takeout,
+    blog_takeout_data_gone,
+    '}',
+
+    edge(takeout, blog_takeout_data_gone, **BLOG_EDGE, constraint='false'),
     CLOUD,
     color=orange,
     label='Google',
