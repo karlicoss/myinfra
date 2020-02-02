@@ -21,8 +21,9 @@ def get_name(obj: Any) -> str:
     return m[oid]
 
 
-class Cluster(NamedTuple):
+class Subgraph(NamedTuple):
     name_: Optional[str]
+    cluster: bool
     raw: Data
 
     @property
@@ -35,7 +36,8 @@ class Cluster(NamedTuple):
 
     def render(self) -> Iterable[str]:
         name = self.name
-        yield f'subgraph cluster_{name}' + ' {'
+        mcl = 'cluster_' if self.cluster else ''
+        yield f'subgraph {mcl}{name}' + ' {'
         for x in [self.raw] if isinstance(self.raw, str) else self.raw:
             # TODO handle multiline stuff properly?
             yield '  ' + x
@@ -74,8 +76,8 @@ def _render(*args: str, **kwargs):
     return list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
 
 
-ClusterItem = Union[str, Dict, Node]
-def cluster(*args: ClusterItem, name: Optional[str]=None, **kwargs) -> Cluster:
+SubgraphItem = Union[str, Dict, Node]
+def subgraph(*args: SubgraphItem, name: Optional[str]=None, cluster: bool=False, **kwargs) -> Subgraph:
     kw = {**kwargs}
     def it() -> Iterable[str]:
         for x in args:
@@ -90,7 +92,11 @@ def cluster(*args: ClusterItem, name: Optional[str]=None, **kwargs) -> Cluster:
                 raise RuntimeError(x)
     ag: Sequence[str] = list(it())
     res = _render(*ag, **kw)
-    return Cluster(name_=name, raw=res)
+    return Subgraph(name_=name, cluster=cluster, raw=res)
+
+
+def cluster(*args, **kwargs) -> Subgraph:
+    return subgraph(*args, cluster=True, **kwargs)
 
 
 def node(name: Optional[str]=None, **kwargs) -> Node:
@@ -111,9 +117,6 @@ def url(u: str, color=blue) -> Extra:
         'URL': u,
         'fontcolor': color, # meh
     }
-
-
-Renderable = Cluster
 
 
 star = 'star'
@@ -351,7 +354,7 @@ exports = cluster(
   #   // exp_point -> exp_jawbone  [style=dashed, constraint=false];
   # }
 
-dals = cluster(
+dals = subgraph(
 '''
     dal_twitter;
     dal_endomondo;
