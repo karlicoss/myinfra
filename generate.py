@@ -156,8 +156,49 @@ def render(x):
         return '\n'.join(x.render())
 
 
+def gh(x: str) -> str:
+    return f'https://github.com/{x}'
+
+
+# TODO pipelines could link to sad state
+
+# TODO FIXME blog edge
+blog_orger = node(
+    **url('https://beepb00p.xyz/orger.html'),
+    label='Orger: plaintex reflextion\nof your digital self',
+    # constraint='false', # TODO # eh?
+)
+
+orger_point = node(shape='point')
+
+# TODO instead of orger, it should be 'Plaintext reflections' or smth like that
+# TODO reduce distance between edges...
+orger = cluster(
+    orger_point,
+    '''
+module_twitter;
+orger_point -> module_twitter [style=invis];
+
+module_kobo;
+module_twitter -> module_kobo [style=invis];
+
+module_instapaper;
+module_kobo -> module_instapaper [style=invis];
+
+module_kobo2org;
+module_instapaper -> module_kobo2org;
+
+module_ip2org;
+module_kobo2org -> module_ip2org;
+    ''',
+    blog_orger,
+    edge(orger_point, blog_orger, **BLOG_EDGE),
+    url(gh('karlicoss/orger')),
+    label='Orger',
+)
+
 def generate() -> str:
-    clusters = [
+    items = [
         phone,
         telegram,
         vkcom,
@@ -170,12 +211,9 @@ def generate() -> str:
         devices,
         emfit,
         kobo,
+        orger,
     ]
-    return '\n'.join(map(render, clusters))
-
-
-def gh(x: str) -> str:
-    return f'https://github.com/{x}'
+    return '\n'.join(map(render, items))
 
 
 tgbackup = node(
@@ -305,6 +343,8 @@ blog_hb_kcals = node(
     label="Making sense of\nEndomondo's calorie estimation",
 )
 
+
+
 def generate_pipelines() -> str:
     items = [
         '{',
@@ -322,24 +362,8 @@ def generate_pipelines() -> str:
     return '\n'.join(map(render, items))
 
 
-blog = cluster(
-    '''
-edge [style=dashed]; 
-
-blog_orger;
-
-
-// TODO pipelines could link to sad state
-orger_point -> blog_orger;
-    ''',
-    label='Blog posts',
-)
-# TODO 
-# TODO decluser and don't participate in constraints?
-
 def generate_post() -> str:
     items = [
-        blog,
     ]
     return '\n'.join(map(render, items))
 
