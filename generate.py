@@ -8,8 +8,11 @@ Data = Union[str, Iterable[str]]
 
 class Cluster(NamedTuple):
     raw: Data
+    name: Optional[str]=None
 
-    def render(self, name: str) -> Iterable[str]: # TODO list str?
+    def render(self, name: Optional[str]=None) -> Iterable[str]: # TODO list str?
+        assert (self.name is None) ^ (name is None)
+        name = self.name or name # meh
         yield f'subgraph cluster_{name}' + ' {'
         for x in [self.raw] if isinstance(self.raw, str) else self.raw:
             # TODO handle multiline stuff properly?
@@ -39,7 +42,7 @@ def _render(*args: str, **kwargs):
 
 
 ClusterItem = Union[str, Dict, Node]
-def cluster(*args: ClusterItem, **kwargs) -> Cluster:
+def cluster(*args: ClusterItem, name: Optional[str]=None, **kwargs) -> Cluster:
     kw = {**kwargs}
     def it() -> Iterable[str]:
         for x in args:
@@ -54,7 +57,7 @@ def cluster(*args: ClusterItem, **kwargs) -> Cluster:
                 raise RuntimeError(x)
     ag: Sequence[str] = list(it())
     res = _render(*ag, **kw)
-    return Cluster(raw=res)
+    return Cluster(raw=res, name=name)
 
 
 def node(name: str, **kwargs) -> Node:
@@ -269,13 +272,6 @@ endomondo = cluster(
     label='Endomondo',
 )
 
-kobo = cluster(
-    'kobo_sqlite [label=sqlite]',
-    url('https://us.kobobooks.com/products/kobo-aura-one-limited-edition'),
-    DEVICE,
-    label='Kobo reader',
-)
-
 # TODO also could show how data gets _into_ the services, i.e. clients?
 
 instapaper = cluster(
@@ -285,19 +281,6 @@ instapaper = cluster(
     color='lightgray', # TODO for other as well?
     label='Instapaper',
 )
-
-emfit = cluster(
-    # TODO dot?
-    '''
-emfit [shape=point];
-emfit_wifi [label="wifi\n(local API)"];
-    ''',
-    # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
-    url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
-    DEVICE,
-    label='Emfit\n(sleep tracker)',
-)
-
 
 emfit_cloud = cluster(
     'emfit_api [label=API]',
@@ -316,7 +299,59 @@ jawbone = cluster(
     label='Jawbone\n(dead)',
 )
 
+def emfit():
+    return cluster(
+        # TODO dot?
+        '''
+    emfit [shape=point];
+    emfit_wifi [label="wifi\n(local API)"];
+        ''',
+        # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
+        url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
+        DEVICE,
+        name='emfit',
+        label='Emfit\n(sleep tracker)',
+    )
 
+
+# TODO not so sure about automatic collection. makes it a bit tricky..
+def kobo():
+    return cluster(
+        'kobo_sqlite [label=sqlite]',
+        url('https://us.kobobooks.com/products/kobo-aura-one-limited-edition'),
+        DEVICE,
+        name='kobo',
+        label='Kobo reader',
+    )
+
+wahoo = node(
+    name='wahoo',
+    label='Wahoo Tickr X\n(HR monitor)',
+    **DEVICE,
+    **url('https://uk.wahoofitness.com/devices/heart-rate-monitors/wahoo-tickr-x-heart-rate-strap'),
+)
+
+jawbone_band = node(
+    name='jawbone',
+    label='Jawbone\n(sleep tracker)',
+    **DEVICE,
+)
+
+bluemaestro = node(
+    name='bluemaestro',
+    label='Bluemaestro\n(environment\nsensor)',
+    **DEVICE,
+    **url('https://bluemaestro.com/products/product-details/bluetooth-environmental-monitor-and-logger'),
+)
+
+devices = cluster(
+    wahoo,
+    jawbone_band,
+    bluemaestro,
+    *emfit().render(),
+    *kobo().render(),
+    label='Devices',
+)
 
 
 def main():
