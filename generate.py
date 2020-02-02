@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, NamedTuple, Union
+from typing import Dict, Iterable, Iterator, NamedTuple, Optional, Union
 
 
 CLOUD = 'style="dashed,rounded";';
@@ -33,26 +33,31 @@ Extra = Dict[str, str]
 
 
 class Node(NamedTuple):
-    label: str
+    name: str
     extra: Dict
 
     def render(self) -> Iterable[str]:
-        yield f'{self.label} ['
-        for l in _render(**self.extra):
+        extra = {**self.extra}
+        if len(extra) == 0:
+            yield self.name
+            return
+
+        yield f'{self.name} ['
+        for l in _render(**extra):
             yield '  ' + l
         yield ']'
 
 
-def node(label: str, **kwargs) -> Node:
-    if ' ' in label:
+def node(name: str, **kwargs) -> Node:
+    if ' ' in name:
         # TODO check if already quoted first?
-        label = f'"{label}"'
-    return Node(label=label, extra=kwargs)
+        name = f'"{name}"'
+    return Node(name=name, extra=kwargs)
 
 
 Edge = str
 def edge(f: Node, t: Node) -> Edge:
-    return f'{f.label} -> {t.label}'
+    return f'{f.name} -> {t.name}'
 
 
 Renderable = Cluster
@@ -75,6 +80,12 @@ blue = 'blue'
 dashed = 'dashed'
 
 
+tgbackup = node(
+    name='tgbackup', # TODO tmp hack?
+    label='telegram_backup',
+)
+
+
 def generate_pipelines() -> str:
     sc = cluster(
 '''
@@ -85,8 +96,9 @@ def generate_pipelines() -> str:
 
     vkexport [shape=cds];
 
-    tgbackup;
-
+''',
+        *tgbackup.render(),
+'''
     endoexport;
     ipexport;
 
