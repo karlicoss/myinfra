@@ -14,7 +14,9 @@ class Cluster(NamedTuple):
 
     def render(self, name: str) -> Iterable[str]: # TODO list str?
         yield f'subgraph cluster_{name}' + ' {'
-        yield from ([self.raw] if isinstance(self.raw, str) else self.raw)
+        for x in [self.raw] if isinstance(self.raw, str) else self.raw:
+            # TODO handle multiline stuff properly?
+            yield '  ' + x
         yield '}'
 
 
@@ -32,6 +34,7 @@ def collect() -> Iterator[str]:
         if isinstance(v, Cluster):
             # TODO name??
             yield from v.render(name=k)
+            yield '\n'
 
 
 def generate() -> str:
@@ -44,11 +47,36 @@ def main():
 
 # TODO eh, these extra nodes are useles..
 telegram = cluster(
-f'''
+'''
 tg_api [label=API];
-{CLOUD}
 ''',
+    CLOUD,
     label='Telegram',
+    URL='https://telegram.org',
+    # TODO ugh. url has to be capitulized; not sure if can make it automalic?
+)
+
+
+vkcom = cluster(
+'''
+vk_api [label=API];
+''',
+    CLOUD,
+    label='VK.com',
+    URL='https://vk.com',
+)
+
+
+orange = 'orange'
+
+# TODO "timeline" can be treated as poor man's api??
+google = cluster(
+    '"Google Location"',
+    '"Google Location" -> "Takeout"',
+    CLOUD,
+    color=orange,
+    label='Google',
+#   // rankdir="TB";  // eh? not working..
 )
 
 
