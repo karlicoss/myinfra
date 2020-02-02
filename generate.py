@@ -104,9 +104,13 @@ def node(name: Optional[str]=None, **kwargs) -> Node:
 
 
 Edge = str
-def edge(f: Node, t: Node, **kwargs) -> Edge:
+Label = str
+Nodish = Union[Node, Label]
+def edge(f: Nodish, t: Nodish, **kwargs) -> Edge:
+    fn = f if isinstance(f, str) else f.name
+    tn = t if isinstance(t, str) else t.name
     extras = '' if len(kwargs) == 0 else ' [' + '\n'.join(_render(**kwargs)) + ']'
-    return f'{f.name} -> {t.name}' + extras
+    return f'{fn} -> {tn}' + extras
 
 blue = 'blue'
 dashed = 'dashed'
@@ -213,6 +217,17 @@ module_kobo2org -> module_ip2org;
     label='Orger',
 )
 
+
+# TODO indicate that it's selfhosted?
+syncthing = cluster(
+    'syncthing [style=invis]',
+    CLOUD,
+    url('https://syncthing.net'),
+    color='lightblue', # TODO fill?
+    label='Syncthing',
+)
+
+
 # TODO these three are same level as orger?
 dashboard = node(
     **url('https://beepb00p.xyz/my-data.html#dashboard'),
@@ -232,6 +247,8 @@ promnesia = node(
     shape=star,
 )
 
+# TODO 
+# blood_tests [label="Blood testing\nfacilities\n(GP/Thriva/etc)"];
 
 def generate() -> str:
     items = [
@@ -247,6 +264,9 @@ def generate() -> str:
         devices,
         emfit,
         kobo,
+        syncthing,
+        edge(app_bm, syncthing), # TODO here, a rooted script is involved
+        edge(syncthing, 'exp_bluemaestro'),
 
         orger,
         '{',
@@ -408,16 +428,19 @@ def generate_post() -> str:
     return '\n'.join(map(render, []))
 
 
+gps = node()
+app_bm = node()
+
 phone = cluster(
     # TODO remove arrows as well?
     '''
 node [style=invis,shape=point];
-gps;
 
 app_endomondo;
-app_bluemaestro;
 app_jawbone;
     ''',
+    app_bm,
+    gps,
     DEVICE,
     label='Phone\n(Android)',
 )
@@ -459,8 +482,8 @@ blog_takeout_data_gone = blog_post(
 
 # TODO "timeline" can be treated as poor man's api??
 google = cluster(
-    # TODO make rendering automatic?
     google_loc,
+    edge(gps, google_loc),
     edge(google_loc, takeout), # TODO something more dsly like multiplication?
 
     # omg, I'm so happy it works so simply
@@ -573,8 +596,14 @@ bluemaestro = node(
 
 devices = cluster(
     wahoo,
+    edge(wahoo, 'app_endomondo', label='BT'),
+
     jawbone_band,
+    edge(jawbone_band, 'app_jawbone', label='BT'),
+
     bluemaestro,
+    edge(bluemaestro, app_bm, label='BT'),
+
     *emfit.render(),
     *kobo.render(),
     label='Devices',
