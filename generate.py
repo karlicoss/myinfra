@@ -115,6 +115,8 @@ def url(u: str) -> Extra:
 Renderable = Cluster
 
 
+star = 'star'
+
 filled = 'filled'
 
 black = 'black'
@@ -273,9 +275,20 @@ dals = cluster(
 # TODO dal links might look better on edges?
 
 
+mypkg = node(
+    **url('https://github.com/karlicoss/my'),
+    label='my. package',
+    shape=star,
+)
+
 def generate_pipelines() -> str:
-    clusters = [scripts, exports, dals]
-    return '\n'.join(map(render, clusters))
+    items = [
+        mypkg,
+        scripts,
+        exports,
+        dals,
+    ]
+    return '\n'.join(map(render, items))
 
 blog = cluster(
     '''
