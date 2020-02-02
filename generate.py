@@ -85,6 +85,29 @@ def url(u: str) -> Extra:
 Renderable = Cluster
 
 
+filled = 'filled'
+
+black = 'black'
+gray = 'gray'
+green = 'green'
+orange = 'orange'
+red = 'red'
+
+
+CLOUD = {
+    'style': 'dashed,rounded',
+}
+
+DEAD = {
+    'style': filled, # TODO need to apaned to styles?
+    'color': red, # TODO not sure. looks bit too bright..
+}
+
+DEVICE = {
+    'style': filled,
+    'color': gray,
+}
+
 def collect(x: Union[Dict, List]) -> Iterator[str]:
     # TODO collect all globals?
     d: Dict
@@ -189,8 +212,58 @@ scripts = cluster(
     style=dashed,
 )
 
+
+# TODO more like 'cluster_fs'?
+#  rankdir=LR;
+exports = cluster(
+'''
+    node [shape=cylinder];
+    // exp_point [shape=point]; // TODO ughhh. why is everything so hard
+    exp_telegram;
+    exp_jawbone;
+    exp_kobo;
+    exp_takeouts;
+    # TODO mention kython.ktakeout??
+    exp_twitter_archives;
+
+    exp_emfit;
+    exp_twitter;
+    exp_vk;
+
+    exp_endomondo;
+    exp_instapaper;
+
+    data_weight;
+    data_blood;
+    # TODO mention manual inputs for these..
+
+    exp_bluemaestro;
+''',
+    style=dashed,
+    color=black,
+    label='Filesystem',
+)
+# TODO eh, figure out better shape for 'dead'
+# TODO perhaps makes more sense to mark edge?
+
+  #   // exp_point -> exp_telegram [style=dashed, constraint=false];
+  #   // exp_point -> exp_jawbone  [style=dashed, constraint=false];
+  # }
+
+dals = cluster(
+'''
+    dal_twitter;
+    dal_endomondo;
+    dal_kobuddy;
+    dal_ip;
+''',
+    label='Data access layer',
+)
+# TODO dal links might look better on edges?
+
+
 def generate_pipelines() -> str:
-    return '\n'.join(collect([scripts]))
+    return '\n'.join(collect([scripts, exports, dals]))
 
 
 def generate_post() -> str:
@@ -227,28 +300,6 @@ def generate_post() -> str:
     }
     return '\n'.join(collect(d))
 
-
-filled = 'filled'
-
-gray = 'gray'
-green = 'green'
-orange = 'orange'
-red = 'red'
-
-
-CLOUD = {
-    'style': 'dashed,rounded',
-}
-
-DEAD = {
-    'style': filled, # TODO need to apaned to styles?
-    'color': red, # TODO not sure. looks bit too bright..
-}
-
-DEVICE = {
-    'style': filled,
-    'color': gray,
-}
 
 phone = cluster(
     # TODO remove arrows as well?
