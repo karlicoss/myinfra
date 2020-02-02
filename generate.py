@@ -143,6 +143,7 @@ def generate_pipelines() -> str:
     takeout  [shape=invtrapezium];
 ''',
         *kobuddy.render(),
+        'emfitexport',
         label='Export scripts',
         style=dashed,
     )
@@ -242,6 +243,26 @@ instapaper = cluster(
     color='lightgray',
     label='Instapaper',
 )
+
+emfit = cluster(
+    # TODO dot?
+    '''
+emfit [shape=point];
+emfit_wifi [label="wifi\n(local API))"];
+    ''',
+    # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
+    **url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
+    **DEVICE,
+    label='Emfit\n(sleep tracker)',
+)
+
+
+emfit_cloud = cluster(
+    'emfit_api [label=API]',
+    CLOUD,
+    label='Emfit',
+)
+
 
 
 def main():
