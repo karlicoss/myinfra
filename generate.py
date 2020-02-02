@@ -404,13 +404,18 @@ jawbone = cluster(
     label='Jawbone\n(dead)',
 )
 
+emfit_wifi = node(
+    name='emfit_wifi',
+    label='wifi\n(local API)',
+    **url('https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd'),
+)
+
 emfit = cluster(
     # TODO dot?
     '''
 emfit [shape=point];
-emfit_wifi [label="wifi\n(local API)"];
     ''',
-    # TODO add https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd
+    emfit_wifi,
     url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
     DEVICE,
     name='emfit',
