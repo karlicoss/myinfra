@@ -174,6 +174,41 @@ def generate_pipelines() -> str:
     return '\n'.join(collect(d=d))
 
 
+def generate_post() -> str:
+
+    # TODO https://beepb00p.xyz/takeout-data-gone.html
+    # TODO decluser and don't participate in constraints?
+    blog = cluster(
+        '''
+    edge [style=dashed]; 
+
+    blog_hb_kcals [
+        label="Making sense of Endomondo's calorie estimation";
+        URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
+    ];
+    blog_mypkg [
+        label="my. package";
+        URL="https://beepb00p.xyz/mypkg.html";
+    ];
+    blog_orger;
+    blog_takeout_data_gone;
+
+
+    // TODO pipelines could link to sad state
+    orger_point -> blog_orger;
+    mypkg       -> blog_hb_kcals;
+    mypkg       -> blog_mypkg;
+    takeout     -> blog_takeout_data_gone;
+        ''',
+        label='Blog posts',
+    )
+
+    d = {
+        'blog': blog,
+    }
+    return '\n'.join(collect(d=d))
+
+
 filled = 'filled'
 
 gray = 'gray'
@@ -357,6 +392,7 @@ devices = cluster(
 def main():
     Path('diagram.dot').write_text(generate())
     Path('pipelines.dot').write_text(generate_pipelines())
+    Path('post.dot').write_text(generate_post())
 
 
 if __name__ == '__main__':
