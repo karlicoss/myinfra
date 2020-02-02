@@ -1,14 +1,35 @@
 #!/usr/bin/env python3
+from functools import lru_cache
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union
+from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
 
 Data = Union[str, Iterable[str]]
 
+
+
+# @lru_cache(1) # TODO hmm, that might not work as expected.. need to init at the end of program??
+def _id2obj() -> Dict[int, Any]:
+    return {id(v): k for k, v in globals().items()}
+
+
+def get_name(obj: Any) -> str:
+    m = _id2obj()
+    oid = id(obj)
+    if oid not in m:
+        breakpoint()
+    assert oid in m, obj
+    return m[oid]
+
+
 class Cluster(NamedTuple):
     raw: Data
     name: Optional[str]=None
+
+    # @property
+    # def name(self) -> str:
+
 
     def render(self, name: Optional[str]=None) -> Iterable[str]: # TODO list str?
         assert self.name == name or (self.name is None) ^ (name is None)
@@ -22,8 +43,19 @@ class Cluster(NamedTuple):
 
 Extra = Dict[str, str]
 class Node(NamedTuple):
-    name: str
+    name_: Optional[str]
     extra: Dict
+
+    @property
+    def name(self) -> str:
+        sn = self.name_
+        if sn is not None:
+            if ' ' in sn:
+                # TODO check if already quoted first?
+                sn = f'"{sn}"'
+            return sn
+        else:
+            return get_name(self)
 
     def render(self) -> Iterable[str]:
         extra = {**self.extra}
@@ -60,11 +92,8 @@ def cluster(*args: ClusterItem, name: Optional[str]=None, **kwargs) -> Cluster:
     return Cluster(raw=res, name=name)
 
 
-def node(name: str, **kwargs) -> Node:
-    if ' ' in name:
-        # TODO check if already quoted first?
-        name = f'"{name}"'
-    return Node(name=name, extra=kwargs)
+def node(name: Optional[str]=None, **kwargs) -> Node:
+    return Node(name_=name, extra=kwargs)
 
 
 Edge = str
@@ -148,7 +177,6 @@ def gh(x: str) -> str:
 
 
 tgbackup = node(
-    name='tgbackup', # TODO tmp hack?
     label='telegram_backup',
     **url(gh('fabianonline/telegram_backup')),
 )
@@ -161,7 +189,6 @@ def dead() -> Extra:
 
 
 vkexport = node(
-    name='vkexport',
     **url(gh('Totktonada/vk_messages_backup')),
     **dead()
     # TODO just unpack dicts if they are in args?
@@ -169,24 +196,19 @@ vkexport = node(
 
 
 endoexport = node(
-    name='endoexport',
     **url(gh('karlicoss/endoexport')),
 )
 
 ipexport = node(
-    name='ipexport',
     label='instapexport',
     **url(gh('karlicoss/instapexport')),
 )
 
 kobuddy = node(
-    name='kobuddy',
     **url(gh('karlicoss/kobuddy')),
 )
 
-# TODO use __name__?
 emfitexport = node(
-    name='emfitexport',
     **url(gh('karlicoss/backup-emfit')),
 )
 
@@ -337,8 +359,12 @@ vk_api [label=API];
     label='VK.com',
 )
 
-google_loc = node('Google Location') # TODO enclose in quotes if necessary?
-takeout = node('Takeout', **url('https://takeout.google.com'))
+# TODO use label
+google_loc = node(name='Google Location')
+takeout = node(
+    name='Takeout',
+    **url('https://takeout.google.com'),
+)
 
 # TODO "timeline" can be treated as poor man's api??
 google = cluster(
@@ -352,9 +378,8 @@ google = cluster(
 #   // rankdir="TB";  // eh? not working..
 )
 
-tw_api = node(name='tw_api', label='API')
+tw_api = node(label='API')
 tw_archive = node(
-    name='tw_archive',
     label='Twitter Archive',
     **url('https://help.twitter.com/en/managing-your-account/how-to-download-your-twitter-archive'),
 )
@@ -405,7 +430,6 @@ jawbone = cluster(
 )
 
 emfit_wifi = node(
-    name='emfit_wifi',
     label='wifi\n(local API)',
     **url('https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd'),
 )
@@ -432,20 +456,18 @@ kobo = cluster(
 )
 
 wahoo = node(
-    name='wahoo',
     label='Wahoo Tickr X\n(HR monitor)',
     **DEVICE,
     **url('https://uk.wahoofitness.com/devices/heart-rate-monitors/wahoo-tickr-x-heart-rate-strap'),
 )
 
 jawbone_band = node(
-    name='jawbone',
+    name='jawbone', # TODO name
     label='Jawbone\n(sleep tracker)',
     **DEVICE,
 )
 
 bluemaestro = node(
-    name='bluemaestro',
     label='Bluemaestro\n(environment\nsensor)',
     **DEVICE,
     **url('https://bluemaestro.com/products/product-details/bluetooth-environmental-monitor-and-logger'),
