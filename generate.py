@@ -106,10 +106,10 @@ blue = 'blue'
 dashed = 'dashed'
 
 
-def url(u: str) -> Extra:
+def url(u: str, color=blue) -> Extra:
     return {
         'URL': u,
-        'fontcolor': blue, # meh
+        'fontcolor': color, # meh
     }
 
 
@@ -125,7 +125,10 @@ gray = 'gray'
 green = 'green'
 orange = 'orange'
 red = 'red'
+purple = 'purple'
 
+
+BLOG_COLOR = purple
 
 CLOUD = {
     'style': 'dashed,rounded',
@@ -143,7 +146,7 @@ DEVICE = {
 
 
 BLOG_EDGE = {
-    'color': blue,
+    'color': BLOG_COLOR,
     'style': dashed,
     'arrowhead': 'none',
 }
@@ -162,9 +165,18 @@ def gh(x: str) -> str:
 
 # TODO pipelines could link to sad state
 
+def blog_post(link: str, *args, **kwargs) -> Node:
+    return node( # type: ignore
+        *args,
+        shape='component',
+        color=BLOG_COLOR,
+        **url(link, color=BLOG_COLOR), # TODO need extra attr to mark link..
+        **kwargs,
+    )  # type: ignore[mise]
+
 # TODO FIXME blog edge
-blog_orger = node(
-    **url('https://beepb00p.xyz/orger.html'),
+blog_orger = blog_post(
+    'https://beepb00p.xyz/orger.html',
     label='Orger: plaintex reflextion\nof your digital self',
     # constraint='false', # TODO # eh?
 )
@@ -330,16 +342,16 @@ mypkg = node(
     shape=star,
 )
 
-blog_mypkg = node(
-    **url('https://beepb00p.xyz/mypkg.html'),
+blog_mypkg = blog_post(
+    'https://beepb00p.xyz/mypkg.html',
     label='my. package:\nPython interface to my life',
 )
 
 # TODO color arrows all the way through? so it's possible to trace how data propagates
 
 
-blog_hb_kcals = node(
-    **url('https://beepb00p.xyz/heartbeats_vs_kcals.html'),
+blog_hb_kcals = blog_post(
+    'https://beepb00p.xyz/heartbeats_vs_kcals.html',
     label="Making sense of\nEndomondo's calorie estimation",
 )
 
@@ -363,9 +375,7 @@ def generate_pipelines() -> str:
 
 
 def generate_post() -> str:
-    items = [
-    ]
-    return '\n'.join(map(render, items))
+    return '\n'.join(map(render, []))
 
 
 phone = cluster(
@@ -412,8 +422,8 @@ takeout = node(
 )
 
 
-blog_takeout_data_gone = node(
-    **url('https://beepb00p.xyz/takeout-data-gone.html'),
+blog_takeout_data_gone = blog_post(
+    'https://beepb00p.xyz/takeout-data-gone.html',
     label="Google Takeouts silently\nremoves old data",
 )
 
@@ -549,3 +559,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# TODO meh. okay, I might need some hackery to properly display edge labels...
+# https://developer.mozilla.org/en-US/docs/Web/SVG/Element/textPath
