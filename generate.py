@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Iterator, NamedTuple, Union
+from typing import Dict, Iterable, Iterator, NamedTuple, Union
 
 
 CLOUD = 'style="dashed,rounded";';
@@ -20,9 +20,39 @@ class Cluster(NamedTuple):
         yield '}'
 
 
+def _render(*args: str, **kwargs):
+    return list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
+
+
 def cluster(*args: str, **kwargs) -> Cluster:
-    res = list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
+    res = _render(*args, **kwargs)
     return Cluster(raw=res)
+
+
+Extra = Dict[str, str]
+
+
+class Node(NamedTuple):
+    label: str
+    extra: Dict
+
+    def render(self) -> Iterable[str]:
+        yield f'{self.label} ['
+        for l in _render(**self.extra):
+            yield '  ' + l
+        yield ']'
+
+
+def node(label: str, **kwargs) -> Node:
+    if ' ' in label:
+        # TODO check if already quoted first?
+        label = f'"{label}"'
+    return Node(label=label, extra=kwargs)
+
+
+Edge = str
+def edge(f: Node, t: Node) -> Edge:
+    return f'{f.label} -> {t.label}'
 
 
 Renderable = Cluster
@@ -69,10 +99,15 @@ vk_api [label=API];
 
 orange = 'orange'
 
+google_loc = node('Google Location') # TODO enclose in quotes if necessary?
+takeout = node('Takeout', URL='https://takeout.google.com')
+
 # TODO "timeline" can be treated as poor man's api??
 google = cluster(
-    '"Google Location"',
-    '"Google Location" -> "Takeout"',
+    # TODO make rendering automatic?
+    *google_loc.render(),
+    *takeout.render(),
+    edge(google_loc, takeout), # TODO something more dsly like multiplication?
     CLOUD,
     color=orange,
     label='Google',
