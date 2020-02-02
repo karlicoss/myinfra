@@ -58,9 +58,9 @@ def edge(f: Node, t: Node) -> Edge:
 Renderable = Cluster
 
 
-def collect() -> Iterator[str]:
+def collect(d: Dict) -> Iterator[str]:
     # TODO collect all globals?
-    for k, v in globals().items():
+    for k, v in d.items():
         if isinstance(v, Cluster):
             # TODO name??
             yield from v.render(name=k)
@@ -68,14 +68,41 @@ def collect() -> Iterator[str]:
 
 
 def generate() -> str:
-    return '\n'.join(collect())
-
-
-def main():
-    Path('diagram.dot').write_text(generate())
+    return '\n'.join(collect(d=globals()))
 
 
 blue = 'blue'
+dashed = 'dashed'
+
+
+def generate_pipelines() -> str:
+    sc = cluster(
+'''
+    // style=dashed;
+
+    tw_manual[shape=invtrapezium];
+    twexport;
+
+    vkexport [shape=cds];
+
+    tgbackup;
+
+    endoexport;
+    ipexport;
+
+    jbexport [shape=cds]; // TODO cross out maybe?
+
+    takeout  [shape=invtrapezium];
+''',
+        label='Export scripts',
+        style=dashed,
+    )
+    d = {
+        'scripts': sc,
+    }
+    return '\n'.join(collect(d=d))
+
+
 
 
 def url(u: str) -> Extra:
@@ -123,6 +150,17 @@ google = cluster(
     label='Google',
 #   // rankdir="TB";  // eh? not working..
 )
+
+# pipelines = cluster(
+#     label='Pipelines',
+#     color='coral',
+#     style='filled',
+# )
+
+
+def main():
+    Path('diagram.dot').write_text(generate())
+    Path('pipelines.dot').write_text(generate_pipelines())
 
 
 if __name__ == '__main__':
