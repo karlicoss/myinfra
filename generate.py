@@ -59,6 +59,16 @@ Edge = str
 def edge(f: Node, t: Node) -> Edge:
     return f'{f.name} -> {t.name}'
 
+blue = 'blue'
+dashed = 'dashed'
+
+
+def url(u: str) -> Extra:
+    return {
+        'URL': u,
+        'fontcolor': blue, # meh
+    }
+
 
 Renderable = Cluster
 
@@ -76,15 +86,41 @@ def generate() -> str:
     return '\n'.join(collect(d=globals()))
 
 
-blue = 'blue'
-dashed = 'dashed'
+def gh(x: str) -> str:
+    return f'https://github.com/{x}'
 
 
 tgbackup = node(
     name='tgbackup', # TODO tmp hack?
     label='telegram_backup',
+    **url(gh('fabianonline/telegram_backup')),
 )
 
+
+def dead() -> Extra:
+    return {
+        'shape': 'cds',
+    }
+
+
+vkexport = node(
+    name='vkexport',
+    **url(gh('Totktonada/vk_messages_backup')),
+    **dead()
+    # TODO just unpack dicts if they are in args?
+)
+
+
+endoexport = node(
+    name='endoexport',
+    **url(gh('karlicoss/endoexport')),
+)
+
+ipexport = node(
+    name='ipexport',
+    label='instapexport',
+    **url(gh('karlicoss/instapexport')),
+)
 
 def generate_pipelines() -> str:
     sc = cluster(
@@ -93,14 +129,12 @@ def generate_pipelines() -> str:
 
     tw_manual[shape=invtrapezium];
     twexport;
-
-    vkexport [shape=cds];
-
 ''',
+        *vkexport.render(),
         *tgbackup.render(),
+        *endoexport.render(),
+        *ipexport.render(),
 '''
-    endoexport;
-    ipexport;
 
     jbexport [shape=cds]; // TODO cross out maybe?
 
@@ -113,17 +147,6 @@ def generate_pipelines() -> str:
         'scripts': sc,
     }
     return '\n'.join(collect(d=d))
-
-
-
-
-def url(u: str) -> Extra:
-    return {
-        'URL': u,
-        'fontcolor': blue, # meh
-    }
-
-
 
 # TODO eh, these extra nodes are useles..
 telegram = cluster(
