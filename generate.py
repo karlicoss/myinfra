@@ -193,6 +193,21 @@ DEVICE = {
     'color': gray,
 }
 
+phone = cluster(
+    # TODO remove arrows as well?
+    '''
+node [style=invis,shape=point];
+gps;
+
+app_endomondo;
+app_bluemaestro;
+app_jawbone;
+    ''',
+    DEVICE,
+    label='Phone\n(Android)',
+)
+
+
 
 # TODO eh, these extra nodes are useles..
 telegram = cluster(
