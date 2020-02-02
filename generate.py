@@ -17,23 +17,24 @@ def _id2obj() -> Dict[int, Any]:
 def get_name(obj: Any) -> str:
     m = _id2obj()
     oid = id(obj)
-    if oid not in m:
-        breakpoint()
     assert oid in m, obj
     return m[oid]
 
 
 class Cluster(NamedTuple):
+    name_: Optional[str]
     raw: Data
-    name: Optional[str]=None
 
-    # @property
-    # def name(self) -> str:
+    @property
+    def name(self) -> str:
+        sn = self.name_
+        if sn is not None:
+            return sn
+        else:
+            return get_name(self)
 
-
-    def render(self, name: Optional[str]=None) -> Iterable[str]: # TODO list str?
-        assert self.name == name or (self.name is None) ^ (name is None)
-        name = self.name or name # meh
+    def render(self) -> Iterable[str]:
+        name = self.name
         yield f'subgraph cluster_{name}' + ' {'
         for x in [self.raw] if isinstance(self.raw, str) else self.raw:
             # TODO handle multiline stuff properly?
@@ -89,7 +90,7 @@ def cluster(*args: ClusterItem, name: Optional[str]=None, **kwargs) -> Cluster:
                 raise RuntimeError(x)
     ag: Sequence[str] = list(it())
     res = _render(*ag, **kw)
-    return Cluster(raw=res, name=name)
+    return Cluster(name_=name, raw=res)
 
 
 def node(name: Optional[str]=None, **kwargs) -> Node:
@@ -137,25 +138,13 @@ DEVICE = {
     'color': gray,
 }
 
-def collect(x: Union[Dict, List]) -> Iterator[str]:
-    # TODO collect all globals?
-    d: Dict
-    if isinstance(x, list):
-        # TODO ok, it's a bit horrible...
-        # TODO just use this logic in def name or something?
-        gl = {id(v): k for k, v in globals().items()}
-        d = {gl[id(o)]: o for o in x}
-    else:
-        d = x
-    for k, v in d.items():
-        if isinstance(v, Cluster):
-            # TODO name??
-            yield from v.render(name=k)
-            yield '\n'
+
+def render(x):
+    return '\n'.join(x.render())
 
 
 def generate() -> str:
-    misc = [
+    clusters = [
         phone,
         telegram,
         vkcom,
@@ -169,7 +158,7 @@ def generate() -> str:
         emfit,
         kobo,
     ]
-    return '\n'.join(collect(misc))
+    return '\n'.join(map(render, clusters))
 
 
 def gh(x: str) -> str:
@@ -285,42 +274,40 @@ dals = cluster(
 
 
 def generate_pipelines() -> str:
-    return '\n'.join(collect([scripts, exports, dals]))
+    clusters = [scripts, exports, dals]
+    return '\n'.join(map(render, clusters))
 
+blog = cluster(
+    '''
+edge [style=dashed]; 
+
+blog_hb_kcals [
+    label="Making sense of Endomondo's calorie estimation";
+    URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
+];
+blog_mypkg [
+    label="my. package";
+    URL="https://beepb00p.xyz/mypkg.html";
+];
+blog_orger;
+blog_takeout_data_gone;
+
+
+// TODO pipelines could link to sad state
+orger_point -> blog_orger;
+mypkg       -> blog_hb_kcals;
+mypkg       -> blog_mypkg;
+takeout     -> blog_takeout_data_gone;
+    ''',
+    label='Blog posts',
+)
+# TODO https://beepb00p.xyz/takeout-data-gone.html
+# TODO decluser and don't participate in constraints?
 
 def generate_post() -> str:
 
-    # TODO https://beepb00p.xyz/takeout-data-gone.html
-    # TODO decluser and don't participate in constraints?
-    blog = cluster(
-        '''
-    edge [style=dashed]; 
-
-    blog_hb_kcals [
-        label="Making sense of Endomondo's calorie estimation";
-        URL="https://beepb00p.xyz/heartbeats_vs_kcals.html";
-    ];
-    blog_mypkg [
-        label="my. package";
-        URL="https://beepb00p.xyz/mypkg.html";
-    ];
-    blog_orger;
-    blog_takeout_data_gone;
-
-
-    // TODO pipelines could link to sad state
-    orger_point -> blog_orger;
-    mypkg       -> blog_hb_kcals;
-    mypkg       -> blog_mypkg;
-    takeout     -> blog_takeout_data_gone;
-        ''',
-        label='Blog posts',
-    )
-
-    d = {
-        'blog': blog,
-    }
-    return '\n'.join(collect(d))
+    clusters = [blog]
+    return '\n'.join(map(render, clusters))
 
 
 phone = cluster(
