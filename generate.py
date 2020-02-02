@@ -75,6 +75,17 @@ def main():
     Path('diagram.dot').write_text(generate())
 
 
+blue = 'blue'
+
+
+def url(u: str) -> Extra:
+    return {
+        'URL': u,
+        'fontcolor': blue, # meh
+    }
+
+
+
 # TODO eh, these extra nodes are useles..
 telegram = cluster(
 '''
@@ -82,8 +93,7 @@ tg_api [label=API];
 ''',
     CLOUD,
     label='Telegram',
-    URL='https://telegram.org',
-    # TODO ugh. url has to be capitulized; not sure if can make it automalic?
+    **url('https://telegram.org'),
 )
 
 
@@ -93,14 +103,14 @@ vk_api [label=API];
 ''',
     CLOUD,
     label='VK.com',
-    URL='https://vk.com',
+    **url('https://vk.com'),
 )
 
 
 orange = 'orange'
 
 google_loc = node('Google Location') # TODO enclose in quotes if necessary?
-takeout = node('Takeout', URL='https://takeout.google.com')
+takeout = node('Takeout', **url('https://takeout.google.com'))
 
 # TODO "timeline" can be treated as poor man's api??
 google = cluster(
