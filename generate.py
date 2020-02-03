@@ -58,6 +58,7 @@ orger_point = node(shape='point')
 
 # TODO instead of orger, it should be 'Plaintext reflections' or smth like that
 # TODO reduce distance between edges...
+# TODO eh. maybe instead simply list/url modules and only split into interactive/static?
 orger = cluster(
     orger_point,
     '''
@@ -71,10 +72,10 @@ module_instapaper;
 module_kobo -> module_instapaper [style=invis];
 
 module_kobo2org;
-module_instapaper -> module_kobo2org;
+module_instapaper -> module_kobo2org [style=invis];
 
 module_ip2org;
-module_kobo2org -> module_ip2org;
+module_kobo2org -> module_ip2org [style=invis];
     ''',
     blog_orger,
     'blog_orger -> module_twitter [style=invis]',
@@ -290,11 +291,12 @@ blog_hb_kcals = blog_post(
 inp_weight = node(
     label='Manual\ninput',
     **MANUAL,
-)
+) # TODO possible to automate inputs though
+
 inp_blood = node(
     label='Manual\ninput',
     **MANUAL,
-)
+) # TODO once in several month?
 
 
 def generate_pipelines() -> str:
@@ -315,9 +317,44 @@ def generate_pipelines() -> str:
     ]
     return '\n'.join(map(render, items))
 
+UI = {
+    'style': filled,
+    'color': 'pink',
+}
+
+def browser(for_):
+    # return new node deliberately
+    # TODO how to make unique?
+    return node(
+        name=f'browser_for_{for_}',
+        label='Browser',
+        **UI,
+    )
+
+ipython = node(
+    label='IPython',
+    **UI,
+)
 
 def generate_post() -> str:
-    return '\n'.join(map(render, []))
+    dbro = browser('dashboard')
+    tbro = browser('timeline')
+    pbro = browser('promnesia')
+    items = [
+        ipython,
+
+        dbro,
+        edge(dashboard, dbro),
+
+        tbro,
+        edge(timeline, tbro),
+
+        pbro,
+        edge(promnesia, pbro),
+
+        edge(mypkg, ipython),
+    ]
+    return '\n'.join(map(render, items))
 
 
 gps = node()
