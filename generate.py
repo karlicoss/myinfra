@@ -265,8 +265,8 @@ def generate() -> str:
         emfit,
         kobo,
         syncthing,
-        edge(app_bm, syncthing), # TODO here, a rooted script is involved
-        edge(syncthing, 'exp_bluemaestro'),
+        edge(app_bm, 'syncthing'), # TODO here, a rooted script is involved
+        edge('syncthing', 'exp_bluemaestro'),
 
         orger,
         '{',
@@ -292,7 +292,6 @@ def dead() -> Extra:
 
 vkexport = node(
     **url(gh('Totktonada/vk_messages_backup')),
-    **dead()
     # TODO just unpack dicts if they are in args?
 )
 
@@ -315,21 +314,30 @@ emfitexport = node(
 )
 
 
+MANUAL = {'shape': 'invtrapezium'}
+
+tw_manual = node(
+    label='Manual request\n(once)',
+    **MANUAL,
+)
+
+
+takeout_manual = node(
+    label='Manual request\n(periodic)', 
+    **MANUAL, # TODO actually, semi-manual?
+)
+
+
 scripts = cluster(
-'''
-    // style=dashed;
-    tw_manual[shape=invtrapezium];
-    twexport;
-''',
+    'twexport',
+    tw_manual,
     vkexport,
     tgbackup,
     endoexport,
     ipexport,
-'''
-    jbexport [shape=cds]; // TODO cross out maybe?
-
-    takeout  [shape=invtrapezium];
-''',
+    'jbexport',
+    # jbexport [shape=cds]; // TODO cross out maybe?
+    takeout_manual,
     kobuddy,
     emfitexport,
     label='Export scripts',
@@ -469,7 +477,7 @@ vk_api [label=API];
 
 # TODO use label
 google_loc = node(name='Google Location')
-takeout = node(
+google_takeout = node(
     name='Takeout',
     **url('https://takeout.google.com'),
 )
@@ -484,15 +492,15 @@ blog_takeout_data_gone = blog_post(
 google = cluster(
     google_loc,
     edge(gps, google_loc),
-    edge(google_loc, takeout), # TODO something more dsly like multiplication?
+    edge(google_loc, google_takeout), # TODO something more dsly like multiplication?
 
     # omg, I'm so happy it works so simply
     '{',
-    takeout,
+    google_takeout,
     blog_takeout_data_gone,
     '}',
 
-    edge(takeout, blog_takeout_data_gone, **BLOG_EDGE, constraint='false'),
+    edge(google_takeout, blog_takeout_data_gone, **BLOG_EDGE, constraint='false'),
     CLOUD,
     color=orange,
     label='Google',
