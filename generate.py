@@ -8,6 +8,10 @@ dotpy.init(__name__) # TODO extremely meh
 from dotpy import *
 
 
+def gh(x: str) -> str:
+    return f'https://github.com/{x}'
+
+
 BLOG_COLOR = purple
 
 CLOUD = {
@@ -30,10 +34,6 @@ BLOG_EDGE = {
     'style': dashed,
     'arrowhead': 'none',
 }
-
-
-def gh(x: str) -> str:
-    return f'https://github.com/{x}'
 
 
 # TODO pipelines could link to sad state
@@ -113,12 +113,20 @@ promnesia = node(
     shape=star,
 )
 
-# TODO 
-# blood_tests [label="Blood testing\nfacilities\n(GP/Thriva/etc)"];
+scales = node(
+    **DEVICE,
+)
+
+blood_tests = node(
+    label="Blood testing\nfacilities\n(GP/Thriva/etc)",
+)
 
 def generate() -> str:
     items = [
         phone,
+
+        scales,
+        blood_tests,
         telegram,
         vkcom,
         google,
@@ -279,6 +287,14 @@ blog_hb_kcals = blog_post(
     label="Making sense of\nEndomondo's calorie estimation",
 )
 
+inp_weight = node(
+    label='Manual\ninput',
+    **MANUAL,
+)
+inp_blood = node(
+    label='Manual\ninput',
+    **MANUAL,
+)
 
 
 def generate_pipelines() -> str:
@@ -291,6 +307,8 @@ def generate_pipelines() -> str:
         edge(mypkg, blog_hb_kcals, **BLOG_EDGE),
         '}',
 
+        inp_weight,
+        inp_blood,
         scripts,
         exports,
         dals,
