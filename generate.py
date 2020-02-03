@@ -1,138 +1,11 @@
 #!/usr/bin/env python3
-from functools import lru_cache
-from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
+# from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
+import dotpy
+dotpy.init(__name__) # TODO extremely meh
 
-Data = Union[str, Iterable[str]]
-
-
-
-# @lru_cache(1) # TODO hmm, that might not work as expected.. need to init at the end of program??
-def _id2obj() -> Dict[int, Any]:
-    return {id(v): k for k, v in globals().items()}
-
-
-def get_name(obj: Any) -> str:
-    m = _id2obj()
-    oid = id(obj)
-    assert oid in m, obj
-    return m[oid]
-
-
-class Subgraph(NamedTuple):
-    name_: Optional[str]
-    cluster: bool
-    raw: Data
-
-    @property
-    def name(self) -> str:
-        sn = self.name_
-        if sn is not None:
-            return sn
-        else:
-            return get_name(self)
-
-    def render(self) -> Iterable[str]:
-        name = self.name
-        mcl = 'cluster_' if self.cluster else ''
-        yield f'subgraph {mcl}{name}' + ' {'
-        for x in [self.raw] if isinstance(self.raw, str) else self.raw:
-            # TODO handle multiline stuff properly?
-            yield '  ' + x
-        yield '}'
-
-
-Extra = Dict[str, str]
-class Node(NamedTuple):
-    name_: Optional[str]
-    extra: Dict
-
-    @property
-    def name(self) -> str:
-        sn = self.name_
-        if sn is not None:
-            if ' ' in sn:
-                # TODO check if already quoted first?
-                sn = f'"{sn}"'
-            return sn
-        else:
-            return get_name(self)
-
-    def render(self) -> Iterable[str]:
-        extra = {**self.extra}
-        if len(extra) == 0:
-            yield self.name
-            return
-
-        yield f'{self.name} ['
-        for l in _render(**extra):
-            yield '  ' + l
-        yield ']'
-
-
-def _render(*args: str, **kwargs):
-    return list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
-
-
-SubgraphItem = Union[str, Dict, Node]
-def subgraph(*args: SubgraphItem, name: Optional[str]=None, cluster: bool=False, **kwargs) -> Subgraph:
-    kw = {**kwargs}
-    def it() -> Iterable[str]:
-        for x in args:
-            if isinstance(x, str):
-                yield x
-            elif isinstance(x, dict):
-                # TODO a bit horrible..
-                kw.update(x)
-            elif isinstance(x, Node):
-                yield from x.render()
-            else:
-                raise RuntimeError(x)
-    ag: Sequence[str] = list(it())
-    res = _render(*ag, **kw)
-    return Subgraph(name_=name, cluster=cluster, raw=res)
-
-
-def cluster(*args, **kwargs) -> Subgraph:
-    return subgraph(*args, cluster=True, **kwargs)
-
-
-def node(name: Optional[str]=None, **kwargs) -> Node:
-    return Node(name_=name, extra=kwargs)
-
-
-Edge = str
-Label = str
-Nodish = Union[Node, Label]
-def edge(f: Nodish, t: Nodish, **kwargs) -> Edge:
-    fn = f if isinstance(f, str) else f.name
-    tn = t if isinstance(t, str) else t.name
-    extras = '' if len(kwargs) == 0 else ' [' + '\n'.join(_render(**kwargs)) + ']'
-    return f'{fn} -> {tn}' + extras
-
-blue = 'blue'
-dashed = 'dashed'
-
-
-def url(u: str, color=blue) -> Extra:
-    return {
-        'URL': u,
-        'fontcolor': color, # meh
-    }
-
-
-star = 'star'
-
-filled = 'filled'
-
-black = 'black'
-gray = 'gray'
-green = 'green'
-orange = 'orange'
-red = 'red'
-purple = 'purple'
+from dotpy import *
 
 
 BLOG_COLOR = purple
@@ -157,13 +30,6 @@ BLOG_EDGE = {
     'style': dashed,
     'arrowhead': 'none',
 }
-
-
-def render(x):
-    if isinstance(x, str):
-        return x
-    else:
-        return '\n'.join(x.render())
 
 
 def gh(x: str) -> str:
@@ -340,7 +206,7 @@ scripts = cluster(
     takeout_manual,
     kobuddy,
     emfitexport,
-    label='Export scripts',
+    label='Export scripts', # TODO instead of label, show legend for stuff that's actually automatic
     style=dashed,
 )
 
