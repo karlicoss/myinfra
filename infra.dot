@@ -24,7 +24,7 @@ digraph G {
   // TODO not sure which rank to choose?
 
 
-  include(`myinfra/diagram.dot')
+  include(`diagram.dot')
 
 # TODO distinguish 'device' and 'service'; display legend
 
@@ -51,7 +51,7 @@ emfit -> emfit_api [label=internet];
 
 # TODO hmm. how to still draw a frame around it?
 subgraph cluster_pipelines {
-  include(`myinfra/pipelines.dot')
+  include(`pipelines.dot')
 }
 
   "Takeout"   -> takeout_manual     -> exp_takeouts;
@@ -182,7 +182,7 @@ mypkg -> promnesia [label="VK"          ];
 
 # TODO separate layer for inputs? e.g. browser/phone etc
 
-include(`myinfra/post.dot')
+include(`post.dot')
 
 // TODO right. I think I need to add browser history and that's it. publish straigh away after that
 

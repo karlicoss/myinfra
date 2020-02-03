@@ -1,0 +1,5 @@
+#!/bin/bash -eux
+
+COMPILE='m4 infra.dot | dot -T svg -o infra.svg'
+echo -e 'infra.dot\ndiagram.dot\npipelines.dot\npost.dot' | \
+    entr -s "echo refreshed && ($COMPILE)"
