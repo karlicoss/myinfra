@@ -1,0 +1,189 @@
+# http://www.graphviz.org/content/cluster
+# TODO https://www.graphviz.org/doc/info/colors.html
+// https://www.rff.com/flowchart_shapes.php
+// https://www.graphviz.org/doc/info/shapes.html
+
+
+// TODO highlight edges that we want to eliminate (mostly to/from the internet?)
+
+digraph G {
+  # https://stackoverflow.com/a/2012106/706389
+  compound=true;
+
+  // ok, newrank doesn't respect clusters..
+  // newrank=true;
+
+  // concatenate=true; // eh, doesn't seem to work..
+
+  node [shape="box"];
+  // rankdir="LR";
+
+  // hmm. used to have this as 'max', but same works a bit neater..
+  rank=same;
+
+  // TODO not sure which rank to choose?
+
+
+  include(`myinfra/diagram.dot')
+
+# TODO distinguish 'device' and 'service'; display legend
+
+# Demonstrates how much indirection is there if you want to own your data
+
+// TODO trivial connections (e.g. twitter phone app -> twitter are omitted)
+// TODO should they be though?
+
+// TODO phone location data
+
+
+# TODO indicate frequencies?
+// TODO kindle (unused)
+# TODO mark ones that are running periodically?
+
+app_endomondo -> end_api; // TODO
+app_jawbone   -> jb_api;
+
+
+emfit -> emfit_api [label=internet];
+
+// TODO if I draw an edge from UI to phone.... gonna be fun
+
+
+# TODO hmm. how to still draw a frame around it?
+subgraph cluster_pipelines {
+  include(`myinfra/pipelines.dot')
+}
+
+  "Takeout"   -> takeout_manual     -> exp_takeouts;
+  tw_archive  -> tw_manual   -> exp_twitter_archives;
+  tw_api      -> twexport    -> exp_twitter;
+  tg_api      -> tgbackup    -> exp_telegram;
+  vk_api      -> vkexport [color=red, label="API closed"];
+  vkexport -> exp_vk;
+  jb_api      -> jbexport [color=red];
+  jbexport -> exp_jawbone;
+  emfit_api   -> emfitexport -> exp_emfit;
+
+  end_api     -> endoexport -> exp_endomondo;
+  ip_api      -> ipexport   -> exp_instapaper;
+
+  kobo_sqlite -> kobuddy    -> exp_kobo;
+
+
+  // TODO PDF annotation software and pdf provider?
+
+
+  # TODO eh, not sure about that
+  // subgraph cluster_mypkg {
+  //   label="my. ";
+  //   style=dashed;
+  //   mypkg;
+  //   "sleep.py";
+  //    "tweets.py";
+  // }
+
+  exp_takeouts                    -> mypkg [label="location data"];
+  exp_twitter_archives            -> mypkg;
+  exp_jawbone                     -> mypkg;
+  # TODO note how this edge is still active despite the fact that jbexport isn't working anymore
+  exp_emfit                       -> mypkg;
+  # TODO as you can see not everything has data access layer
+  # so there is still something to work on
+
+  exp_vk                          -> mypkg;
+  exp_twitter    -> dal_twitter   -> mypkg;
+  exp_endomondo  -> dal_endomondo -> mypkg;
+  exp_instapaper -> dal_ip        -> mypkg;
+
+  exp_kobo       -> dal_kobuddy   -> mypkg;
+  data_weight                     -> mypkg; # TODO mention orgparse
+  data_blood                      -> mypkg; # TODO mention orgparse
+
+
+scales -> inp_weight -> data_weight;
+blood_tests -> inp_blood -> data_blood;
+// TODO manual step
+
+
+// TODO browser history?
+
+# TODO display google home and mention how useless it is
+
+# TODO motivation for blood
+# I'm planning on tracking this for several decades, so providers will change
+
+# TODO could expand mypkg into separate files as well to demonstrate which data is consumed by what?
+
+# TODO mypkg is somewhat specific to my needs
+# TODO highlight that it's easy to hook to DAL 
+
+# TODO distinguish manual and automatic nodes?
+# TODO instead have twexport on edges? ultimately not that much difference..
+
+# TODO position borg above
+
+# TODO indicate stuff that is 'inactive' and not used anymore
+# TODO e.g. vk.com pipelines
+
+// subgraph cluster_backups {
+//   label="Backups";
+
+//   borg;
+
+// }
+
+// exp_point -> borg [ltail=cluster_exports];
+
+# TODO mark edges that use cachew?
+
+# TODO also provide dynamic version if someone wants to mess with in browser
+# wonder if could allow to show/hide nodes?
+
+
+# TODO these are read only; contribute to search
+
+# TODO cloudmacs?
+# TODO arctee
+# TODO link some of my blog posts? E.g. ones using endomondo
+
+
+
+mypkg -> timeline;
+
+
+mypkg -> dashboard [label="Calendar"];
+mypkg -> dashboard [label="Sleep"];
+mypkg -> dashboard [label="Exercise"];
+# TODO perhaps I need HR provider?
+mypkg -> dashboard [label="Blood data"];
+mypkg -> dashboard [label="Weight"];
+
+# TODO distinguish regular manual tasks and 'only once' manual tasks
+# perhaps highlight regular manual with red
+# TODO kobo -- semi manual?
+
+
+exp_takeouts -> promnesia [label="Google Takeout"];
+exp_telegram -> promnesia [label="Telegram"];
+
+mypkg -> promnesia [label="FB messenger"];
+mypkg -> promnesia [label="Hypothes.is" ];
+mypkg -> promnesia [label="Instapaper"  ];
+mypkg -> promnesia [label="Org files"   ];
+mypkg -> promnesia [label="Pocket"      ];
+mypkg -> promnesia [label="Reddit"      ];
+# TODO show missing links? like HN
+mypkg -> promnesia [label="Telegram"    ];
+mypkg -> promnesia [label="Twitter"     ];
+mypkg -> promnesia [label="VK"          ];
+
+
+# TODO I guess it's nice to mention where I mention certain bits of infrastructure?
+
+# TODO separate layer for inputs? e.g. browser/phone etc
+
+include(`myinfra/post.dot')
+
+// TODO right. I think I need to add browser history and that's it. publish straigh away after that
+
+}
