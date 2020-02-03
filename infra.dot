@@ -6,13 +6,12 @@
 
 // TODO highlight edges that we want to eliminate (mostly to/from the internet?)
 
-# echo 'infra.dot' | entr dot -T svg infra.dot -o infra.svg
-
 digraph G {
   # https://stackoverflow.com/a/2012106/706389
   compound=true;
 
   // ok, newrank doesn't respect clusters..
+  // newrank=true;
 
   // concatenate=true; // eh, doesn't seem to work..
 
@@ -22,31 +21,19 @@ digraph G {
   // hmm. used to have this as 'max', but same works a bit neater..
   rank=same;
 
-  // TODO not sure which rang to choose?
+  // TODO not sure which rank to choose?
 
 
   include(`myinfra/diagram.dot')
-
-
-gps -> "Google Location";
 
 # TODO distinguish 'device' and 'service'; display legend
 
 # Demonstrates how much indirection is there if you want to own your data
 
-
-# TODO eh, these extra nodes are useles..
-
 // TODO trivial connections (e.g. twitter phone app -> twitter are omitted)
 // TODO should they be though?
 
 // TODO phone location data
-
-wahoo   -> app_endomondo [label=bluetooth];
-jawbone -> app_jawbone   [label=bluetooth];
-
-
-bluemaestro -> app_bluemaestro [label=bluetooth];
 
 
 # TODO indicate frequencies?
@@ -62,24 +49,19 @@ emfit -> emfit_api [label=internet];
 // TODO if I draw an edge from UI to phone.... gonna be fun
 
 
-scl [label=scales];
-// scales;
-// thriva;
-
 # TODO hmm. how to still draw a frame around it?
 subgraph cluster_pipelines {
   include(`myinfra/pipelines.dot')
-
-  mypkg [shape=star]; // TODO not sure if I need a node?
-
 }
 
-  "Takeout"   -> takeout     -> exp_takeouts;
+  "Takeout"   -> takeout_manual     -> exp_takeouts;
   tw_archive  -> tw_manual   -> exp_twitter_archives;
   tw_api      -> twexport    -> exp_twitter;
   tg_api      -> tgbackup    -> exp_telegram;
-  vk_api      -> vkexport    -> exp_vk;
-  jb_api      -> jbexport    -> exp_jawbone;
+  vk_api      -> vkexport [color=red, label="API closed"];
+  vkexport -> exp_vk;
+  jb_api      -> jbexport [color=red];
+  jbexport -> exp_jawbone;
   emfit_api   -> emfitexport -> exp_emfit;
 
   end_api     -> endoexport -> exp_endomondo;
@@ -87,7 +69,6 @@ subgraph cluster_pipelines {
 
   kobo_sqlite -> kobuddy    -> exp_kobo;
 
-  app_bluemaestro -> exp_bluemaestro [label=syncthing];
 
   // TODO PDF annotation software and pdf provider?
 
@@ -119,9 +100,8 @@ subgraph cluster_pipelines {
   data_blood                      -> mypkg; # TODO mention orgparse
 
 
-scl -> data_weight;
-blood_tests [label="Blood testing\nfacilities\n(GP/Thriva/etc)"];
-blood_tests -> data_blood;
+scales -> inp_weight -> data_weight;
+blood_tests -> inp_blood -> data_blood;
 // TODO manual step
 
 
@@ -145,72 +125,28 @@ blood_tests -> data_blood;
 # TODO indicate stuff that is 'inactive' and not used anymore
 # TODO e.g. vk.com pipelines
 
-# TODO svg output with links
-subgraph cluster_backups {
-  label="Backups";
+// subgraph cluster_backups {
+//   label="Backups";
 
-  borg;
+//   borg;
 
-# exp_kobo             -> borg [style=dashed];
-# exp_twitter_archives -> borg [style=dashed];
-# exp_twitter          -> borg [style=dashed];
-# exp_endomondo        -> borg [style=dashed];
-}
+// }
 
-exp_point -> borg [ltail=cluster_exports];
+// exp_point -> borg [ltail=cluster_exports];
 
 # TODO mark edges that use cachew?
 
 # TODO also provide dynamic version if someone wants to mess with in browser
 # wonder if could allow to show/hide nodes?
 
-# TODO instead of orger, it should be 'Plaintext reflections' or smth like that
-subgraph cluster_orger {
-  label=Orger;
-  module_twitter;
-  module_kobo;
-  module_instapaper;
-
-  module_kobo2org;
-  module_ip2org;
-
-  orger_point [shape=point];
-}
-mypkg -> module_twitter;
-mypkg -> module_kobo;
-mypkg -> module_instapaper;
 
 # TODO these are read only; contribute to search
-module_twitter    -> twitter_org;
-module_kobo       -> kobo_org;
-module_instapaper -> instapaper_org;
-
-module_kobo2org   -> org_agenda;
-module_ip2org     -> org_agenda;
-
-org_agenda -> emacs;
 
 # TODO cloudmacs?
 # TODO arctee
 # TODO link some of my blog posts? E.g. ones using endomondo
 
 
-
-subgraph cluster_ui {
-  label="User interfaces";
-  style=filled;
-  color=pink;
-
-  emacs;
-  browser;
-  ipython;
-}
-
-
-dashboard [shape=star];
-timeline  [shape=star];
-
-mypkg -> ipython;
 
 mypkg -> timeline;
 
@@ -225,8 +161,6 @@ mypkg -> dashboard [label="Weight"];
 # TODO distinguish regular manual tasks and 'only once' manual tasks
 # perhaps highlight regular manual with red
 # TODO kobo -- semi manual?
-
-promnesia [shape=star];
 
 
 exp_takeouts -> promnesia [label="Google Takeout"];
@@ -244,27 +178,12 @@ mypkg -> promnesia [label="Twitter"     ];
 mypkg -> promnesia [label="VK"          ];
 
 
-promnesia -> browser;
-timeline  -> browser;
-dashboard -> browser;
-
-
-{
-  kobo_org,
-  twitter_org,
-  instapaper_org
-} -> emacs;
-
 # TODO I guess it's nice to mention where I mention certain bits of infrastructure?
-
-# TODO style blog posts differently?
-# TODO position below all
 
 # TODO separate layer for inputs? e.g. browser/phone etc
 
 include(`myinfra/post.dot')
 
 // TODO right. I think I need to add browser history and that's it. publish straigh away after that
-// TODO ok, that's ki
 
 }
