@@ -36,6 +36,12 @@ BLOG_EDGE = {
 }
 
 
+UI = {
+    'style': filled,
+    'color': 'pink',
+}
+
+
 # TODO pipelines could link to sad state
 
 def blog_post(link: str, *args, **kwargs) -> Node:
@@ -56,33 +62,55 @@ blog_orger = blog_post(
 
 orger_point = node(shape='point')
 
+def orger_static() -> List[str]:
+    return [
+        'kobo',
+        'twitter',
+        'instapaper',
+        # TODO actually get them straight from orger modules?
+    ]
+
+def orger_todos() -> List[str]:
+    return [
+        'kobo2org',
+        'ip2org',
+    ]
+
+orger_static_node = node(
+    label='\n'.join(['Static modules'] + orger_static())
+)
+
+# TODO come up with a better name.. it involves reddit and hackerviews too
+orger_int_node = node(
+    label='\n'.join(['Interactive modules'] + orger_todos())
+)
+
 # TODO instead of orger, it should be 'Plaintext reflections' or smth like that
 # TODO reduce distance between edges...
 # TODO eh. maybe instead simply list/url modules and only split into interactive/static?
 orger = cluster(
     orger_point,
-    '''
-module_twitter;
-orger_point -> module_twitter [style=invis];
-
-module_kobo;
-module_twitter -> module_kobo [style=invis];
-
-module_instapaper;
-module_kobo -> module_instapaper [style=invis];
-
-module_kobo2org;
-module_instapaper -> module_kobo2org [style=invis];
-
-module_ip2org;
-module_kobo2org -> module_ip2org [style=invis];
-    ''',
+    orger_static_node,
+    orger_int_node,
     blog_orger,
-    'blog_orger -> module_twitter [style=invis]',
-    edge(orger_point, blog_orger, **BLOG_EDGE),
+    edge(orger_point, blog_orger, **BLOG_EDGE, constraint='false'),
+    # 'blog_orger -> module_twitter [style=invis]',
     url(gh('karlicoss/orger')),
     label='Orger',
 )
+
+# TODO add .point attribute to cluster?
+orger_outputs_point = node(shape='point')
+
+orger_outputs = cluster(
+    'node [shape=cylinder]',
+    orger_outputs_point,
+    edge(orger_static_node, '"readonly views"'),
+    edge(orger_int_node   , '"interative views"'), # TODO
+    edge(orger_int_node   , '"todo lists"'),
+    label='Org-mode files',
+)
+
 
 
 # TODO indicate that it's selfhosted?
@@ -122,6 +150,13 @@ blood_tests = node(
     label="Blood testing\nfacilities\n(GP/Thriva/etc)",
 )
 
+
+emacs = node(
+    label='Emacs\n(Spacemacs)',
+    **UI,
+)
+
+
 def generate() -> str:
     items = [
         phone,
@@ -144,6 +179,10 @@ def generate() -> str:
         edge('syncthing', 'exp_bluemaestro'),
 
         orger,
+        orger_outputs,
+        emacs,
+        edge(orger_outputs_point, emacs),
+
         '{',
         dashboard,
         timeline,
@@ -307,6 +346,8 @@ def generate_pipelines() -> str:
         edge(mypkg, blog_mypkg   , **BLOG_EDGE),
         blog_hb_kcals,
         edge(mypkg, blog_hb_kcals, **BLOG_EDGE),
+
+        edge(mypkg, orger_point), # TODO not sure if belongs here..
         '}',
 
         inp_weight,
@@ -317,10 +358,6 @@ def generate_pipelines() -> str:
     ]
     return '\n'.join(map(render, items))
 
-UI = {
-    'style': filled,
-    'color': 'pink',
-}
 
 def browser(for_):
     # return new node deliberately
