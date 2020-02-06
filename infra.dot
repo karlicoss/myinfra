@@ -7,9 +7,12 @@
 // TODO highlight edges that we want to eliminate (mostly to/from the internet?)
 
 digraph G {
-  # https://stackoverflow.com/a/2012106/706389
+  // some hack for edges between clusters?
+  // https://stackoverflow.com/a/2012106/706389
   compound=true;
 
+  // size="10,10"
+  // ratio="fill"
   // ok, newrank doesn't respect clusters..
   // newrank=true;
 

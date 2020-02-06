@@ -271,6 +271,15 @@ scripts = cluster(
     style=dashed,
 )
 
+against_db = blog_post(
+    'https://beepb00p.xyz/unnecessary-db.html',
+    label='Against unnecessary databases',
+)
+
+mydata = blog_post(
+    'https://beepb00p.xyz/my-data.html',
+    label='What data I collect and why?',
+)
 
 # TODO more like 'cluster_fs'?
 #  rankdir=LR;
@@ -298,6 +307,14 @@ exports = cluster(
 
     exp_bluemaestro;
 ''',
+    'subgraph uuu {',
+    against_db,
+    mydata,
+
+    # TODO ugh. it completely breaks the layout...
+    # edge(against_db, mydata),
+    '}',
+
     style=dashed,
     color=black,
     label='Filesystem',
