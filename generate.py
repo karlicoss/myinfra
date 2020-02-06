@@ -69,7 +69,7 @@ blog_orger = blog_post(
     # constraint='false', # TODO # eh?
 )
 
-orger_point = node(shape='point')
+orger_point = node(shape=point)
 
 def orger_static() -> List[str]:
     return [
@@ -109,7 +109,7 @@ orger = cluster(
 )
 
 # TODO add .point attribute to cluster?
-orger_outputs_point = node(shape='point')
+orger_outputs_point = node(shape=point)
 
 orger_outputs = cluster(
     'node [shape=cylinder]',
@@ -321,6 +321,7 @@ mypkg = node(
     **url('https://github.com/karlicoss/my'),
     label='my. package',
     # shape=star,
+    shape=point,
 )
 
 blog_mypkg = blog_post(
@@ -347,21 +348,34 @@ inp_blood = node(
 ) # TODO once in several month?
 
 
+mypy_err = blog_post(
+    'https://beepb00p.xyz/mypy-error-handling.html',
+    label='Using mypy for error handling',
+)
+# TODO use different style
+cachew = node(
+    label='cachew\npersistent cache/serialization',
+    **url('https://github.com/karlicoss/cachew'),
+)
+mypkg_out = node('mypkg_out', shape='point')
+
+mypkg_usecases = cluster(
+    blog_hb_kcals,
+    label='Usecases',
+    style=dashed,
+)
+
+mypkg_tech = cluster(
+    mypy_err,
+    cachew,
+    label='Libraries/patterns',
+    style=dashed,
+)
+
+
+
 def mypkg_promnesia(*, label: str, lid: int):
-    #t1 = f'mypkg_{lid}'
-    #t2 = f'mypkg2_{lid}'
-    #tf = f'mypkg_final'
-    # TODO comments?
-    # TODO how to group them?
-
-    # yield node(t1, **INVIS)
-    # yield node(t2, **INVIS)
-    # yield edge(mypkg, t1)
-    # yield edge(t1, t2)
-    # yield edge(t2, tf)
-    # yield edge(tf, promnesia, label=label)
-
-    yield edge('mypkg_out', promnesia, label=label)
+    yield edge(mypkg_out, promnesia, label=label)
 
 
 mypkg_promnesia_edges = chain.from_iterable(
@@ -378,16 +392,7 @@ mypkg_promnesia_edges = chain.from_iterable(
     ])
 )
 
-mypy_err = blog_post(
-    'https://beepb00p.xyz/mypy-error-handling.html',
-    label='Using mypy for error handling',
-)
-# TODO use different style
-cachew = node(
-    label='cachew\npersistent cache/serialization',
-    **url('https://github.com/karlicoss/cachew'),
-)
-mypkg_out = node('mypkg_out', shape='point')
+# TODO would be nice to add color; in that case node could be 'contaigious' and propagate color
 
 def generate_pipelines() -> str:
     items = [
@@ -404,20 +409,14 @@ def generate_pipelines() -> str:
 
         # TODO group together cachew/mypy_err in a table?
         # add a label 'tecnhiques used'?
-        # cachew,
-        # mypy_err,
-        # edge(mypkg, mypy_err),
-        # edge(mypy_err, cachew),
-        # edge(cachew, mypkg_out),
         edge(mypkg, mypkg_out),
 
         blog_mypkg,
         edge(mypkg, blog_mypkg   , **BLOG_EDGE, **NOCONSTRAINT),
         # TODO link separate table with usage examples?
-        blog_hb_kcals,
-        edge(mypkg, blog_hb_kcals, **BLOG_EDGE, **NOCONSTRAINT),
-
-        edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
+        mypkg_usecases,
+        mypkg_tech,
+        # edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
 
         edge(mypkg_out, orger_point), # TODO not sure if belongs here..
 

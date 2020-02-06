@@ -2,6 +2,7 @@ import sys
 from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
 
+point = 'point'
 star = 'star'
 
 dashed = 'dashed'
