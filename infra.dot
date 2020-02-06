@@ -148,15 +148,15 @@ blood_tests -> inp_blood -> data_blood;
 
 
 
-mypkg -> timeline;
+mypkg_out -> timeline;
 
 
-mypkg -> dashboard [label="Calendar"];
-mypkg -> dashboard [label="Sleep"];
-mypkg -> dashboard [label="Exercise"];
+mypkg_out -> dashboard [label="Calendar"];
+mypkg_out -> dashboard [label="Sleep"];
+mypkg_out -> dashboard [label="Exercise"];
 # TODO perhaps I need HR provider?
-mypkg -> dashboard [label="Blood data"];
-mypkg -> dashboard [label="Weight"];
+mypkg_out -> dashboard [label="Blood data"];
+mypkg_out -> dashboard [label="Weight"];
 
 # TODO distinguish regular manual tasks and 'only once' manual tasks
 # perhaps highlight regular manual with red
@@ -166,17 +166,10 @@ mypkg -> dashboard [label="Weight"];
 exp_takeouts -> promnesia [label="Google Takeout"];
 exp_telegram -> promnesia [label="Telegram"];
 
-mypkg -> promnesia [label="FB messenger"];
-mypkg -> promnesia [label="Hypothes.is" ];
-mypkg -> promnesia [label="Instapaper"  ];
-mypkg -> promnesia [label="Org files"   ];
-mypkg -> promnesia [label="Pocket"      ];
-mypkg -> promnesia [label="Reddit"      ];
+# TODO not sure; maybe instead of multiple edges have one edge with multiple labels?
 # TODO show missing links? like HN
-mypkg -> promnesia [label="Telegram"    ];
-mypkg -> promnesia [label="Twitter"     ];
-mypkg -> promnesia [label="VK"          ];
 
+# TODO for orger, give more specific examples for static (e.g. used for search) and interactive (e.g. used to process reddit/hn)
 
 # TODO I guess it's nice to mention where I mention certain bits of infrastructure?
 

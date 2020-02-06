@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from itertools import chain
 from pathlib import Path
 # from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
@@ -23,6 +24,10 @@ DEAD = {
     'color': red, # TODO not sure. looks bit too bright..
 }
 
+INVIS = {
+    'style': 'invis',
+}
+
 DEVICE = {
     'style': filled,
     'color': gray,
@@ -39,6 +44,10 @@ BLOG_EDGE = {
 UI = {
     'style': filled,
     'color': 'pink',
+}
+
+NOCONSTRAINT = {
+    'constraint': 'false',
 }
 
 
@@ -311,7 +320,7 @@ dals = subgraph(
 mypkg = node(
     **url('https://github.com/karlicoss/my'),
     label='my. package',
-    shape=star,
+    # shape=star,
 )
 
 blog_mypkg = blog_post(
@@ -338,23 +347,89 @@ inp_blood = node(
 ) # TODO once in several month?
 
 
+def mypkg_promnesia(*, label: str, lid: int):
+    #t1 = f'mypkg_{lid}'
+    #t2 = f'mypkg2_{lid}'
+    #tf = f'mypkg_final'
+    # TODO comments?
+    # TODO how to group them?
+
+    # yield node(t1, **INVIS)
+    # yield node(t2, **INVIS)
+    # yield edge(mypkg, t1)
+    # yield edge(t1, t2)
+    # yield edge(t2, tf)
+    # yield edge(tf, promnesia, label=label)
+
+    yield edge('mypkg_out', promnesia, label=label)
+
+
+mypkg_promnesia_edges = chain.from_iterable(
+    mypkg_promnesia(label=l, lid=i) for i, l in enumerate([
+        "FB messenger"
+        "Hypothes.is",
+        "Instapaper",
+        "Org files",
+        "Pocket",
+        "Reddit",
+        "Telegram",
+        "Twitter",
+        "VK",
+    ])
+)
+
+mypy_err = blog_post(
+    'https://beepb00p.xyz/mypy-error-handling.html',
+    label='Using mypy for error handling',
+)
+# TODO use different style
+cachew = node(
+    label='cachew\npersistent cache/serialization',
+    **url('https://github.com/karlicoss/cachew'),
+)
+mypkg_out = node('mypkg_out', shape='point')
+
 def generate_pipelines() -> str:
     items = [
-        '{',
-        mypkg,
-        blog_mypkg,
-        edge(mypkg, blog_mypkg   , **BLOG_EDGE),
-        blog_hb_kcals,
-        edge(mypkg, blog_hb_kcals, **BLOG_EDGE),
-
-        edge(mypkg, orger_point), # TODO not sure if belongs here..
-        '}',
-
         inp_weight,
         inp_blood,
         scripts,
         exports,
         dals,
+
+        'subgraph cluster_xxx {',
+        'label="my. package"',
+        mypkg,
+        mypkg_out,
+
+        # TODO group together cachew/mypy_err in a table?
+        # add a label 'tecnhiques used'?
+        # cachew,
+        # mypy_err,
+        # edge(mypkg, mypy_err),
+        # edge(mypy_err, cachew),
+        # edge(cachew, mypkg_out),
+        edge(mypkg, mypkg_out),
+
+        blog_mypkg,
+        edge(mypkg, blog_mypkg   , **BLOG_EDGE, **NOCONSTRAINT),
+        # TODO link separate table with usage examples?
+        blog_hb_kcals,
+        edge(mypkg, blog_hb_kcals, **BLOG_EDGE, **NOCONSTRAINT),
+
+        edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
+
+        edge(mypkg_out, orger_point), # TODO not sure if belongs here..
+
+        *mypkg_promnesia_edges,
+        '}',
+
+        # edge(mypkg, 'alala'),
+        # edge('alala', promnesia),
+
+
+        # TODO need to reorder?
+
     ]
     return '\n'.join(map(render, items))
 
@@ -389,7 +464,7 @@ def generate_post() -> str:
         pbro,
         edge(promnesia, pbro),
 
-        edge(mypkg, ipython),
+        edge(mypkg_out, ipython),
     ]
     return '\n'.join(map(render, items))
 
@@ -588,3 +663,8 @@ if __name__ == '__main__':
 
 # TODO meh. okay, I might need some hackery to properly display edge labels...
 # https://developer.mozilla.org/en-US/docs/Web/SVG/Element/textPath
+
+# TODO dot allows comments?
+
+# TODO maybe, use html table? not sure..
+# https://renenyffenegger.ch/notes/tools/Graphviz/examples/index
