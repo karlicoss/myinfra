@@ -35,16 +35,9 @@ digraph G {
 
 // TODO phone location data
 
-
 # TODO indicate frequencies?
 // TODO kindle (unused)
 # TODO mark ones that are running periodically?
-
-app_endomondo -> end_api; // TODO
-app_jawbone   -> jb_api;
-
-
-emfit -> emfit_api [label=internet];
 
 // TODO if I draw an edge from UI to phone.... gonna be fun
 
@@ -71,16 +64,6 @@ subgraph cluster_pipelines {
 
 
   // TODO PDF annotation software and pdf provider?
-
-
-  # TODO eh, not sure about that
-  // subgraph cluster_mypkg {
-  //   label="my. ";
-  //   style=dashed;
-  //   mypkg;
-  //   "sleep.py";
-  //    "tweets.py";
-  // }
 
   exp_takeouts                    -> mypkg [label="location data"];
   exp_twitter_archives            -> mypkg;

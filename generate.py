@@ -184,8 +184,12 @@ def generate() -> str:
         emfit,
         kobo,
         syncthing,
-        edge(app_bm, 'syncthing'), # TODO here, a rooted script is involved
-        edge('syncthing', 'exp_bluemaestro'),
+
+        edge(app_endomondo, end_api),
+        edge(app_jawbone, jb_api),
+        edge(emfit_point, emfit_api),
+        edge(app_bm, syncthing), # TODO here, a rooted script is involved
+        edge(syncthing, 'exp_bluemaestro'),
 
         orger,
         orger_outputs,
@@ -470,15 +474,16 @@ def generate_post() -> str:
 
 gps = node()
 app_bm = node()
+app_endomondo = node()
+app_jawbone = node()
 
 phone = cluster(
     # TODO remove arrows as well?
     '''
 node [style=invis,shape=point];
-
-app_endomondo;
-app_jawbone;
     ''',
+    app_endomondo,
+    app_jawbone,
     app_bm,
     gps,
     DEVICE,
@@ -551,12 +556,14 @@ twittercom = cluster(
     tw_api,
     tw_archive,
     CLOUD,
-    color='lightblue',
+    color=lightblue,
     label='Twitter',
 )
 
+end_api = node(label='API')
+
 endomondo = cluster(
-    'end_api [label=API]',
+    end_api,
     CLOUD,
     url('https://www.endomondo.com'),
     color=green,
@@ -573,16 +580,19 @@ instapaper = cluster(
     label='Instapaper',
 )
 
+emfit_api = node(label='API')
+
 emfit_cloud = cluster(
-    'emfit_api [label=API]',
+    emfit_api,
     CLOUD,
     label='Emfit',
 )
 
+jb_api = node(label='API')
 # TODO demonstrate that it's dead
 # TODO not sure. wedged? striped? invert colors?
 jawbone = cluster(
-    'jb_api [label=API]',
+    jb_api,
     CLOUD,
     DEAD,
     **url('https://en.wikipedia.org/wiki/Jawbone_(company)#UP24'),
@@ -595,11 +605,10 @@ emfit_wifi = node(
     **url('https://gist.github.com/harperreed/9d063322eb84e88bc2d0580885011bdd'),
 )
 
+
+emfit_point = node(shape=point)
 emfit = cluster(
-    # TODO dot?
-    '''
-emfit [shape=point];
-    ''',
+    emfit_point,
     emfit_wifi,
     url('https://www.emfit.com/why-choose-emfit-for-sleep-analysis'),
     DEVICE,
@@ -636,10 +645,10 @@ bluemaestro = node(
 
 devices = cluster(
     wahoo,
-    edge(wahoo, 'app_endomondo', label='BT'),
+    edge(wahoo, app_endomondo, label='BT'),
 
     jawbone_band,
-    edge(jawbone_band, 'app_jawbone', label='BT'),
+    edge(jawbone_band, app_jawbone, label='BT'),
 
     bluemaestro,
     edge(bluemaestro, app_bm, label='BT'),

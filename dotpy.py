@@ -8,6 +8,7 @@ star = 'star'
 dashed = 'dashed'
 filled = 'filled'
 
+lightblue = 'lightblue'
 black  = 'black'
 blue   = 'blue'
 gray   = 'gray'
