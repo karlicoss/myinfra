@@ -68,6 +68,8 @@ MANUAL = {
     'shape': 'invtrapezium',
 }
 
+
+
 # TODO pipelines could link to sad state
 
 def blog_post(link: str, *args, **kwargs) -> Node:
@@ -200,6 +202,7 @@ def generate() -> str:
 
         *cluster_enforce_ordering.render(),
 
+        reddit,
         telegram,
         vkcom,
         google,
@@ -242,14 +245,8 @@ def generate() -> str:
 tgbackup = node(
     label='telegram_backup',
     **url(gh('fabianonline/telegram_backup')),
-    style='rounded',
+    **AUTO,
 )
-
-
-def dead() -> Extra:
-    return {
-        'shape': 'cds',
-    }
 
 
 vkexport = node(
@@ -370,11 +367,14 @@ twexport = node(**AUTO)
 jbexport = node(**AUTO)
 # jbexport [shape=cds]; // TODO cross out maybe?
 
+rexport = node(**AUTO, **url(gh('karlicoss/rexport')))
+
 scripts = cluster(
     twexport,
     tw_manual,
     vkexport,
     tgbackup,
+    rexport,
     endoexport,
     ipexport,
     jbexport,
@@ -403,6 +403,7 @@ cluster_fewfwfjwf = cluster(
     **INVIS,
 )
 
+exp_reddit     = node(label='json')
 exp_telegram   = node(label='sqlite')
 exp_jawbone    = node(label='json')
 exp_kobo       = node(label='sqlite')
@@ -416,10 +417,9 @@ exp_bluemaestro = node(label='sqlite', **CYLINDER)
 
 # TODO more like 'cluster_fs'?
 exports = cluster(
-'''
-    node [shape=cylinder];
-''',
+    'node [shape=cylinder]',
     *cluster_fewfwfjwf.render(),
+    exp_reddit,
     exp_telegram,
     exp_jawbone,
     exp_kobo,
@@ -603,6 +603,7 @@ def _mi(from_, **kwargs):
 
 def mypkg_incoming_edges():
     return chain.from_iterable([
+    _mi('exp_reddit'     , label='DAL', **E.reddit, **url(gh('karlicoss/rexport'))),
     _mi('exp_twitter'    , label='DAL', **E.tw),
     _mi('exp_endomondo'  , label='DAL', **url(gh('karlicoss/endoexport')), **E.end),
     _mi('exp_instapaper' , label='DAL', **url(gh('karlicoss/instapexport'))),
@@ -637,7 +638,8 @@ def pipelines():
 
         *edges(end_api, endoexport, 'exp_endomondo', E.end),
 
-        *edges('tg_api', tgbackup, 'exp_telegram', E.tg),
+        *edges(tg_api, tgbackup, exp_telegram, E.tg),
+        *edges(reddit_api, rexport, 'exp_reddit', E.reddit),
         *edges('kobo_sqlite', kobuddy, 'exp_kobo', E.kobo),
 
         edge(jb_api, 'jbexport', E.jb, color=red),
@@ -826,12 +828,6 @@ google = cluster(
 #   // rankdir="TB";  // eh? not working..
 )
 
-tw_api = api_node()
-tw_archive = node(
-    label='Twitter Archive',
-    **url('https://help.twitter.com/en/managing-your-account/how-to-download-your-twitter-archive'),
-)
-
 # TODO map manual steps without intermediate nodes?
 
 col_twitter = lightblue
@@ -840,6 +836,15 @@ col_kobo    = '#bf2026'
 col_jb      = '#540baf'
 col_blood   = red
 col_weight  = 'brown'
+col_reddit  = 'pink'
+
+
+tw_api = api_node()
+tw_archive = node(
+    label='Twitter Archive',
+    **url('https://help.twitter.com/en/managing-your-account/how-to-download-your-twitter-archive'),
+)
+
 
 twittercom = cluster(
     tw_api,
@@ -847,6 +852,15 @@ twittercom = cluster(
     CLOUD,
     color=col_twitter,
     label='Twitter',
+)
+
+
+reddit_api = api_node()
+reddit = cluster(
+    reddit_api,
+    CLOUD,
+    color=col_reddit,
+    label='Reddit',
 )
 
 
@@ -858,7 +872,6 @@ cluster_enforce_ordering = cluster(
 )
 
 
-end_api = api_node()
 
 class E:
     # TODO warn on conflict?
@@ -869,6 +882,7 @@ class E:
     jb     = dict(arrowhead=diamond, fillcolor=col_jb)
     blood  = dict(arrowhead=diamond, fillcolor=col_blood)
     weight = dict(arrowhead=diamond, fillcolor=col_weight)
+    reddit = dict(arrowhead=diamond, fillcolor=col_reddit)
 
 # meh...
 colmap = {
@@ -878,9 +892,11 @@ colmap = {
     my.sleep : E.jb,
     my.blood : E.blood,
     my.weight: E.weight,
+    my.reddit: E.reddit,
 }
 
 
+end_api = api_node()
 endomondo = cluster(
     end_api,
     CLOUD,
