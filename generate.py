@@ -168,6 +168,8 @@ emacs = node(
 
 def generate() -> str:
     items = [
+        meta,
+
         phone,
 
         scales,
@@ -255,6 +257,44 @@ takeout_manual = node(
 )
 
 
+against_db = blog_post(
+    'https://beepb00p.xyz/unnecessary-db.html',
+    label='Against unnecessary databases',
+)
+
+mydata = blog_post(
+    'https://beepb00p.xyz/my-data.html',
+    label='What data I collect and why?',
+)
+
+scheduler = blog_post(
+    'https://beepb00p.xyz/scheduler.html',
+    label='In search of a friendlier scheduler',
+    # TODO better is not a great adjective here.
+    # friendlier??
+)
+
+
+brain_coping = blog_post(
+    'https://beepb00p.xyz/pkm-setup.html',
+    label='How to cope with a human brain',
+)
+
+sad_infra = blog_post(
+    'https://beepb00p.xyz/sad-infra.html',
+    label='The sad state of personal data and infrastructure',
+)
+
+
+meta = cluster(
+    brain_coping,
+    sad_infra,
+    edge(brain_coping, sad_infra, **INVIS),
+    label='Meta',
+    style=dashed,
+)
+
+
 scripts = cluster(
     'twexport',
     tw_manual,
@@ -267,18 +307,10 @@ scripts = cluster(
     takeout_manual,
     kobuddy,
     emfitexport,
+    scheduler,
+
     label='Export scripts', # TODO instead of label, show legend for stuff that's actually automatic
     style=dashed,
-)
-
-against_db = blog_post(
-    'https://beepb00p.xyz/unnecessary-db.html',
-    label='Against unnecessary databases',
-)
-
-mydata = blog_post(
-    'https://beepb00p.xyz/my-data.html',
-    label='What data I collect and why?',
 )
 
 # TODO more like 'cluster_fs'?
@@ -339,8 +371,8 @@ dals = subgraph(
 
 
 mypkg = node(
-    **url('https://github.com/karlicoss/my'),
-    label='my. package',
+    # **url('https://github.com/karlicoss/my'),
+    # label='my. package',
     # shape=star,
     shape=point,
 )
@@ -398,7 +430,7 @@ mypkg_tech = cluster(
 def mypkg_promnesia(*, label: str, lid: int):
     yield edge(mypkg_out, promnesia, label=label)
 
-
+# TODO multiedges? a -> {b, c}
 mypkg_promnesia_edges = chain.from_iterable(
     mypkg_promnesia(label=l, lid=i) for i, l in enumerate([
         "FB messenger"
@@ -424,7 +456,6 @@ def generate_pipelines() -> str:
         dals,
 
         'subgraph cluster_xxx {',
-        'label="my. package"',
         mypkg,
         mypkg_out,
 
@@ -442,6 +473,12 @@ def generate_pipelines() -> str:
         edge(mypkg_out, orger_point), # TODO not sure if belongs here..
 
         *mypkg_promnesia_edges,
+
+        # TODO extract cluster?
+        # TODO fix url
+        # *url(gh('karlicoss/my')),
+        'label="my. package"',
+
         '}',
 
         # edge(mypkg, 'alala'),
@@ -450,6 +487,9 @@ def generate_pipelines() -> str:
 
         # TODO need to reorder?
 
+        # TODO debug mode?
+        # 'style=invisible',
+        'style=dashed',
     ]
     return '\n'.join(map(render, items))
 
@@ -672,7 +712,9 @@ devices = cluster(
 
     *emfit.render(),
     *kobo.render(),
+
     label='Devices',
+    style=dashed,
 )
 
 
