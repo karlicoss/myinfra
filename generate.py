@@ -285,17 +285,17 @@ takeout_manual = node(
 
 against_db = blog_post(
     'https://beepb00p.xyz/unnecessary-db.html',
-    label='Against unnecessary databases',
+    label='Against\nunnecessary databases',
 )
 
 mydata = blog_post(
     'https://beepb00p.xyz/my-data.html',
-    label='What data I collect and why?',
+    label='What data I collect\nand why?',
 )
 
 scheduler = blog_post(
     'https://beepb00p.xyz/scheduler.html',
-    label='In search of a friendlier scheduler',
+    label='In search of\na friendlier scheduler',
     # TODO better is not a great adjective here.
     # friendlier??
 )
@@ -308,7 +308,7 @@ brain_coping = blog_post(
 
 sad_infra = blog_post(
     'https://beepb00p.xyz/sad-infra.html',
-    label='The sad state of personal data and infrastructure',
+    label='The sad state of\npersonal data and infrastructure',
 )
 
 
@@ -402,7 +402,7 @@ exports = cluster(
 
     # TODO mention manual inputs for these..
 
-    exp_bluemaestro;
+    exp_bluemaestro [shape=cylinder];
 ''',
     'subgraph uuu {',
     against_db,
@@ -436,10 +436,8 @@ dals = subgraph(
 
 
 mypkg = node(
-    # **url('https://github.com/karlicoss/my'),
+    **url('https://github.com/karlicoss/my'),
     # label='my. package',
-    # shape=star,
-    shape=point,
 )
 
 blog_mypkg = blog_post(
@@ -468,7 +466,7 @@ inp_blood = node(
 
 mypy_err = blog_post(
     'https://beepb00p.xyz/mypy-error-handling.html',
-    label='Using mypy for error handling',
+    label='Using mypy for\nerror handling',
 )
 # TODO use different style
 cachew = node(
@@ -625,7 +623,7 @@ def pipelines():
         *edges(emfit_api, emfitexport, 'exp_emfit'),
         *edges('ip_api', ipexport, 'exp_instapaper'),
 
-        edge('vk_api', vkexport, label='API closed', **url('https://github.com/Totktonada/vk_messages_backup/pull/8#issuecomment-494582792', color=red)),
+        edge('vk_api', vkexport, label='API closed', **url('https://github.com/Totktonada/vk_messages_backup/pull/8#issuecomment-494582792'), color=red),
         edge(vkexport, 'exp_vk'),
 
         # TODO hmm, margin look interesting..
@@ -743,10 +741,20 @@ node [style=invis,shape=point];
 # TODO eh, these extra nodes are useles..
 
 col_tg = '#0088cc'
+
+def api_node(*args, **kwargs):
+    return node(
+        label='API',
+        shape='diamond',
+        color='#00000066',
+    )
+
+
+
+tg_api = api_node()
+
 telegram = cluster(
-'''
-tg_api [label=API];
-''',
+    tg_api,
     CLOUD,
     url('https://telegram.org'),
     color=col_tg,
@@ -754,10 +762,9 @@ tg_api [label=API];
 )
 
 
+vk_api = api_node()
 vkcom = cluster(
-'''
-vk_api [label=API];
-''',
+    vk_api,
     CLOUD,
     url('https://vk.com'),
     label='VK.com',
@@ -795,7 +802,7 @@ google = cluster(
 #   // rankdir="TB";  // eh? not working..
 )
 
-tw_api = node(label='API')
+tw_api = api_node()
 tw_archive = node(
     label='Twitter Archive',
     **url('https://help.twitter.com/en/managing-your-account/how-to-download-your-twitter-archive'),
@@ -813,7 +820,7 @@ twittercom = cluster(
     label='Twitter',
 )
 
-end_api = node(label='API')
+end_api = api_node()
 
 col_end    = green
 col_kobo   = '#bf2026'
@@ -852,15 +859,17 @@ endomondo = cluster(
 
 # TODO also could show how data gets _into_ the services, i.e. clients?
 
+ip_api = api_node()
 instapaper = cluster(
-    'ip_api [label=API]',
+    ip_api,
     CLOUD,
     url('https://www.instapaper.com'),
     color='lightgray', # TODO for other as well?
     label='Instapaper',
 )
 
-emfit_api = node(label='API')
+# TODO for API, could just use special arrow style?
+emfit_api = api_node()
 
 emfit_cloud = cluster(
     emfit_api,
@@ -868,7 +877,7 @@ emfit_cloud = cluster(
     label='Emfit',
 )
 
-jb_api = node(label='API')
+jb_api = api_node()
 # TODO demonstrate that it's dead
 # TODO not sure. wedged? striped? invert colors?
 # TODO better way to mark dead?
