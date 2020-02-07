@@ -411,6 +411,7 @@ cachew = node(
     **url('https://github.com/karlicoss/cachew'),
 )
 mypkg_out = node('mypkg_out', shape='point')
+# TODO space out mypkg_out nodes?
 
 mypkg_usecases = cluster(
     blog_hb_kcals,
