@@ -113,8 +113,9 @@ digraph G {
 
 # TODO separate layer for inputs? e.g. browser/phone etc
 
-include(`post.dot')
-
 // TODO right. I think I need to add browser history and that's it. publish straigh away after that
 
 }
+
+
+// TODO not sure what should be first class... e.g. it's nice to be able to change somthing in dot file and rerender immediately

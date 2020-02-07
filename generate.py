@@ -223,6 +223,8 @@ def generate() -> str:
         timeline,
         promnesia,
         '}',
+
+        *post(),
     ]
     return '\n'.join(map(render, items))
 
@@ -684,7 +686,7 @@ ipython = node(
     **UI,
 )
 
-def generate_post() -> str:
+def post():
     dbro = browser('dashboard')
     tbro = browser('timeline')
     pbro = browser('promnesia')
@@ -712,7 +714,7 @@ def generate_post() -> str:
         *edges(scales, inp_weight, 'data_weight', **E.weight),
 
     ]
-    return '\n'.join(map(render, items))
+    return items
 
 
 gps = node()
@@ -938,8 +940,6 @@ devices = cluster(
 
 def main():
     Path('diagram.dot').write_text(generate())
-    # Path('pipelines.dot').write_text(generate_pipelines())
-    Path('post.dot').write_text(generate_post())
 
 
 if __name__ == '__main__':
