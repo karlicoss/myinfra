@@ -433,31 +433,73 @@ mypkg_tech = cluster(
 )
 
 
-
-def mypkg_promnesia(*, label: str, lid: int):
-    aux = node(f'mypkg_aux_{lid}', shape=point)
-    # TODO hmm. if I draw labels on these, could be good?
+def mypkg_module(*, module: str, lid: int):
+    aux = node(module, shape=point)
     yield aux
+    label = module.replace('_', '.')
     yield edge(mypkg, aux, label=label, style=dotted)
-    yield edge(aux, promnesia)
+
+
+class my:
+    fbm        = 'my_fbmessenger'
+    hyp        = 'my_hypothesis'
+    instapaper = 'my_instapaper'
+    pocket     = 'my_pocket'
+    reddit     = 'my_reddit'
+    tg         = 'my_telegram'
+    tw         = 'my_twitter'
+    vk         = 'my_vk'
+    weight     = 'my_weight'
+    sleep      = 'my_sleep'
+    ex         = 'my_exercise'
+    cal        = 'my_calendar'
+    blood      = 'my_blood'
+
 
 # TODO multiedges? a -> {b, c}
 # TODO font isn't great..
-mypkg_promnesia_edges = chain.from_iterable(
-    mypkg_promnesia(label=l, lid=i) for i, l in enumerate([
-        'Org files', # TODO that perhaps should link from the filesystem..
-        'my.fbmessenger',
-        'my.hypothesis',
-        'my.instapaper',
-        'my.pocket',
-        'my.reddit',
-        'my.telegram',
-        'my.twitter',
-        'my.vk',
+mypkg_module_edges = chain.from_iterable(
+    mypkg_module(module=l, lid=i) for i, l in enumerate([
+        # 'Org files', # TODO FIXME that perhaps should link from the filesystem..
+        my.fbm,
+        my.hyp,
+        my.instapaper,
+        my.pocket,
+        my.reddit,
+        my.tg,
+        my.tw,
+        my.vk,
         # TODO ok, think about connecting all mypkg modules (e.g. to dashboard/timeline as well)
-        # 'my.weight',
+        my.weight,
+        my.sleep,
+        my.ex,
+        my.cal,
+        my.blood,
     ])
 )
+
+mypkg_promnesia_edges = [
+    edge(mod, promnesia) for mod in {
+        my.fbm,
+        my.hyp,
+        my.instapaper,
+        my.pocket,
+        my.reddit,
+        my.tg,
+        my.tw,
+        my.vk,
+    }
+]
+
+mypkg_dashboard_edges = [
+    edge(mod, dashboard) for mod in {
+        my.weight,
+        my.sleep,
+        my.ex,
+        my.cal,
+        my.blood,
+    }
+]
 
 def _mi(from_, **kwargs):
     aux = node('mypkg_in_' + from_, shape=point) # TODO ugh. invis doesn't help here; it still takes space..
@@ -525,7 +567,9 @@ def generate_pipelines() -> str:
 
         edge(mypkg_out, orger_point), # TODO not sure if belongs here..
 
+        *mypkg_module_edges,
         *mypkg_promnesia_edges,
+        *mypkg_dashboard_edges,
 
         # TODO extract cluster?
         # TODO fix url
@@ -578,6 +622,8 @@ def generate_post() -> str:
         edge(promnesia, pbro),
 
         edge(mypkg_out, ipython),
+
+        edge(mypkg_out, timeline),
     ]
     return '\n'.join(map(render, items))
 

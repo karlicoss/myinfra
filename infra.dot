@@ -88,10 +88,9 @@ blood_tests -> inp_blood -> data_blood;
 # TODO could expand mypkg into separate files as well to demonstrate which data is consumed by what?
 
 # TODO mypkg is somewhat specific to my needs
-# TODO highlight that it's easy to hook to DAL 
+# TODO highlight that it's easy to hook to DAL
 
 # TODO distinguish manual and automatic nodes?
-# TODO instead have twexport on edges? ultimately not that much difference..
 
 # TODO position borg above
 
@@ -120,16 +119,7 @@ blood_tests -> inp_blood -> data_blood;
 # TODO link some of my blog posts? E.g. ones using endomondo
 
 
-
-mypkg_out -> timeline;
-
-
-mypkg_out -> dashboard [label="Calendar"];
-mypkg_out -> dashboard [label="Sleep"];
-mypkg_out -> dashboard [label="Exercise"];
 # TODO perhaps I need HR provider?
-mypkg_out -> dashboard [label="Blood data"];
-mypkg_out -> dashboard [label="Weight"];
 
 # TODO distinguish regular manual tasks and 'only once' manual tasks
 # perhaps highlight regular manual with red
