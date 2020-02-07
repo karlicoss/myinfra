@@ -146,13 +146,24 @@ def node(name: Optional[str]=None, **kwargs) -> Node:
     return Node(name_=name, extra=kwargs)
 
 
-def edge(f: Nodish, t: Nodish, *args, **kwargs) -> Edge:
+EdgeArg = Union[Nodish, Dict]
+
+def edges(f: Nodish, t: Nodish, *args: EdgeArg, **kwargs) -> Iterator[Edge]:
+    ee = [f, t]
     # TODO maybe allow multiedges?
     extra = {**kwargs}
     for a in args:
-        assert isinstance(a, dict)
-        extra.update(a)
-    return Edge(f=f, t=t, extra=extra)
+        if isinstance(a, dict):
+            extra.update(a)
+        else:
+            ee.append(a)
+    for ff, tt in zip(ee, ee[1:]):
+        yield Edge(f=ff, t=tt, extra=extra)
+
+
+def edge(*args, **kwargs) -> Edge:
+    [e] = edges(*args, **kwargs)
+    return e
 
 
 def url(u: str, color=blue) -> Extra:
