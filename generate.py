@@ -193,55 +193,6 @@ emacs = node(
 )
 
 
-def generate() -> str:
-    items = [
-        legend,
-        meta,
-
-        phone,
-
-        *cluster_enforce_ordering.render(),
-
-        reddit,
-        telegram,
-        vkcom,
-        google,
-        endomondo,
-        instapaper,
-        emfit_cloud,
-        jawbone,
-        devices,
-        emfit,
-        kobo,
-        syncthing_cl,
-
-        edge(app_endomondo, end_api),
-        edge(app_jawbone, jb_api),
-        edge(emfit_point, emfit_api),
-        # TODO hmm, syncthing could be an edge
-        edge(app_bm, syncthing), # TODO here, a rooted script is involved
-        edge(syncthing, exp_bluemaestro),
-
-        orger,
-        orger_outputs,
-        emacs,
-        edge(orger_outputs_point, emacs),
-
-        'subgraph cluster_pipelines {',
-        *pipelines(),
-        '}',
-
-        '{',
-        dashboard,
-        timeline,
-        promnesia,
-        '}',
-
-        *post(),
-    ]
-    return '\n'.join(map(render, items))
-
-
 tgbackup = node(
     label='telegram_backup',
     **url(gh('fabianonline/telegram_backup')),
@@ -394,15 +345,6 @@ exp_twitter = node(label='sqlite')
 exp_twitter_archives = node(label='json')
 
 
-# eh. also just to order properly
-cluster_fewfwfjwf = cluster(
-    data_weight,
-    data_blood,
-    exp_twitter,
-    exp_twitter_archives,
-    **INVIS,
-)
-
 exp_reddit     = node(label='json')
 exp_telegram   = node(label='sqlite')
 exp_jawbone    = node(label='json')
@@ -414,6 +356,17 @@ exp_endomondo  = node(label='json')
 exp_instapaper = node(label='json')
 # ugh. seems like a bug, it should inherit cylinder spect from the cluster
 exp_bluemaestro = node(label='sqlite', **CYLINDER)
+
+
+# eh. also just to order properly
+cluster_fewfwfjwf = cluster(
+    data_weight,
+    data_blood,
+    exp_twitter,
+    exp_twitter_archives,
+    **INVIS,
+)
+
 
 # TODO more like 'cluster_fs'?
 exports = cluster(
@@ -441,21 +394,8 @@ exports = cluster(
     color=black,
     label='Filesystem',
 )
-# TODO eh, figure out better shape for 'dead'
-# TODO perhaps makes more sense to mark edge?
-
 
 # TODO add reference to data access layer to the graph
-dals = subgraph(
-'''
-    dal_twitter;
-    dal_endomondo;
-    dal_kobuddy;
-    dal_ip;
-''',
-    label='Data access layer',
-)
-# TODO dal links might look better on edges?
 
 
 mypkg = node(
@@ -864,15 +804,6 @@ reddit = cluster(
 )
 
 
-cluster_enforce_ordering = cluster(
-    scales,
-    blood_tests,
-    *twittercom.render(),
-    INVIS,
-)
-
-
-
 class E:
     # TODO warn on conflict?
     end    = dict(arrowhead=diamond, fillcolor=col_end)
@@ -997,6 +928,65 @@ devices = cluster(
     # style=dashed,
     INVIS,
 )
+
+
+cluster_enforce_ordering = cluster(
+    scales,
+    blood_tests,
+    *twittercom.render(),
+    *telegram.render(),
+    INVIS,
+)
+
+
+def generate() -> str:
+    items = [
+        legend,
+        meta,
+
+        phone,
+
+        *cluster_enforce_ordering.render(),
+
+        reddit,
+        # telegram,
+        vkcom,
+        google,
+        endomondo,
+        instapaper,
+        emfit_cloud,
+        jawbone,
+        devices,
+        emfit,
+        kobo,
+        syncthing_cl,
+
+        edge(app_endomondo, end_api),
+        edge(app_jawbone, jb_api),
+        edge(emfit_point, emfit_api),
+        # TODO hmm, syncthing could be an edge
+        edge(app_bm, syncthing), # TODO here, a rooted script is involved
+        edge(syncthing, exp_bluemaestro),
+
+        orger,
+        orger_outputs,
+        emacs,
+        edge(orger_outputs_point, emacs),
+
+        'subgraph cluster_pipelines {',
+        *pipelines(),
+        '}',
+
+        '{',
+        dashboard,
+        timeline,
+        promnesia,
+        '}',
+
+        *post(),
+    ]
+    return '\n'.join(map(render, items))
+
 
 
 def main():
