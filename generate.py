@@ -208,6 +208,10 @@ def generate() -> str:
         emacs,
         edge(orger_outputs_point, emacs),
 
+        'subgraph cluster_pipelines {',
+        *pipelines(),
+        '}',
+
         '{',
         dashboard,
         timeline,
@@ -576,7 +580,7 @@ def mypkg_incoming_edges():
 
 # TODO would be nice to add color; in that case node could be 'contaigious' and propagate color
 
-def generate_pipelines() -> str:
+def pipelines():
     items = [
         inp_weight,
         inp_blood,
@@ -642,7 +646,7 @@ def generate_pipelines() -> str:
         # 'style=invisible',
         'style=dashed',
     ]
-    return '\n'.join(map(render, items))
+    return items
 
 
 def browser(for_):
@@ -910,7 +914,7 @@ devices = cluster(
 
 def main():
     Path('diagram.dot').write_text(generate())
-    Path('pipelines.dot').write_text(generate_pipelines())
+    # Path('pipelines.dot').write_text(generate_pipelines())
     Path('post.dot').write_text(generate_post())
 
 

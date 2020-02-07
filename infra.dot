@@ -46,9 +46,6 @@ digraph G {
 
 
 # TODO hmm. how to still draw a frame around it?
-subgraph cluster_pipelines {
-  include(`pipelines.dot')
-}
 
 // TODO hmm red:green:blue could be useful..
 // TODO not sure about the diamond..

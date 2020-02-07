@@ -1,4 +1,4 @@
 #!/bin/bash -eux
 
-echo -e 'infra.dot\ndiagram.dot\npipelines.dot\npost.dot\npostprocess.py\ngenerate.py' | \
+echo -e 'infra.dot\ndiagram.dot\npost.dot\npostprocess.py\ngenerate.py' | \
     entr -s "echo refreshed && (./compile > infra.svg)"

@@ -2,4 +2,5 @@
 set -eux -o pipefail
 
 ./generate.py
+# TODO tee for debug?
 m4 infra.dot | dot -T svg | ./postprocess.py
