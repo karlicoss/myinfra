@@ -182,12 +182,17 @@ def generate() -> str:
 
         phone,
 
+        # ugh. cluster is just to enforce ordering?
+        'subgraph cluster_fewfwf {',
         scales,
         blood_tests,
+        twittercom,
+        'style=invisible',
+        '}',
+
         telegram,
         vkcom,
         google,
-        twittercom,
         endomondo,
         instapaper,
         emfit_cloud,
@@ -363,22 +368,30 @@ exports = cluster(
 '''
     node [shape=cylinder];
     // exp_point [shape=point]; // TODO ughhh. why is everything so hard
+
+    // eh. also just to order properly
+    subgraph cluster_fewjfiewfj {
+    data_weight;
+    data_blood;
+    exp_twitter;
+    exp_twitter_archives;
+    style=invisible;
+    }
+
     exp_telegram;
     exp_jawbone;
     exp_kobo;
     exp_takeouts;
     # TODO mention kython.ktakeout??
-    exp_twitter_archives;
 
     exp_emfit;
-    exp_twitter;
+
+
     exp_vk;
 
     exp_endomondo;
     exp_instapaper;
 
-    data_weight;
-    data_blood;
     # TODO mention manual inputs for these..
 
     exp_bluemaestro;
