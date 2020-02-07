@@ -436,10 +436,7 @@ mypkg_tech = cluster(
 
 def mypkg_module(*, module: str, lid: int):
     extra = colmap.get(module, {})
-    if module == my.sleep:
-        # TODO meeeh
-        # I guess I need some automatic model for what is getting combined?
-        extra.update({'color': 'green:blue'})
+    # TODO combine colors?
     # TODO color dots instead?
 
     aux = node(module, shape=point)
@@ -533,12 +530,12 @@ def mypkg_incoming_edges():
     _mi('exp_bluemaestro'),
 
     _mi('exp_takeouts'),
-    _mi('exp_twitter_archives'),
-    _mi('exp_jawbone'),
+    _mi('exp_twitter_archives', **E.tw),
+    _mi('exp_jawbone', **E.jb),
     _mi('exp_emfit'),
     _mi('exp_vk'),
-    _mi('data_weight'),
-    _mi('data_blood'),
+    _mi('data_weight', **E.weight),
+    _mi('data_blood', **E.blood),
     # TODO orgparse
     # TODO note how this edge is still active despite the fact that jbexport isn't working anymore
 ])
@@ -562,6 +559,9 @@ def generate_pipelines() -> str:
 
         *edges('tg_api', tgbackup, 'exp_telegram', E.tg),
         *edges('kobo_sqlite', kobuddy, 'exp_kobo', E.kobo),
+
+        edge(jb_api, 'jbexport', E.jb, color=red),
+        edge('jbexport', 'exp_jawbone', E.jb),
 
         # TODO hmm, margin look interesting..
         'subgraph cluster_mypkgcl {',
@@ -644,6 +644,11 @@ def generate_post() -> str:
         edge(mypkg_out, ipython),
 
         edge(mypkg_out, timeline),
+
+
+        *edges(blood_tests, inp_blood, 'data_blood', **E.blood),
+        *edges(scales, inp_weight, 'data_weight', **E.weight),
+
     ]
     return '\n'.join(map(render, items))
 
@@ -743,23 +748,31 @@ twittercom = cluster(
 
 end_api = node(label='API')
 
-col_end = green
-col_kobo = '#bf2026'
+col_end    = green
+col_kobo   = '#bf2026'
+col_jb     = '#540baf'
+col_blood  = 'red'
+col_weight = 'brown'
 
 class E:
     # TODO warn on conflict?
-    end  = dict(arrowhead=diamond, fillcolor=col_end)
-    tw   = dict(arrowhead=diamond, fillcolor=col_twitter)
-    tg   = dict(arrowhead=diamond, fillcolor=col_tg)
-    kobo = dict(arrowhead=diamond, fillcolor=col_kobo)
+    end    = dict(arrowhead=diamond, fillcolor=col_end)
+    tw     = dict(arrowhead=diamond, fillcolor=col_twitter)
+    tg     = dict(arrowhead=diamond, fillcolor=col_tg)
+    kobo   = dict(arrowhead=diamond, fillcolor=col_kobo)
+    jb     = dict(arrowhead=diamond, fillcolor=col_jb)
+    blood  = dict(arrowhead=diamond, fillcolor=col_blood)
+    weight = dict(arrowhead=diamond, fillcolor=col_weight)
 
 # meh...
 colmap = {
-    my.tw  : E.tw,
-    my.tg  : E.tg,
+    my.tw    : E.tw,
+    my.tg    : E.tg,
     # my.kobo: E.kobo,
+    my.sleep : E.jb,
+    my.blood : E.blood,
+    my.weight: E.weight,
 }
-
 
 
 endomondo = cluster(
@@ -791,12 +804,13 @@ emfit_cloud = cluster(
 jb_api = node(label='API')
 # TODO demonstrate that it's dead
 # TODO not sure. wedged? striped? invert colors?
+# TODO better way to mark dead?
 jawbone = cluster(
     jb_api,
     CLOUD,
-    DEAD,
+    # DEAD,
     **url('https://en.wikipedia.org/wiki/Jawbone_(company)#UP24'),
-    color=orange,
+    color=col_jb,
     label='Jawbone\n(dead)',
 )
 
