@@ -6,6 +6,7 @@ point = 'point'
 star = 'star'
 
 dashed = 'dashed'
+dotted = 'dotted'
 filled = 'filled'
 
 lightblue = 'lightblue'

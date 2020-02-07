@@ -77,11 +77,6 @@ subgraph cluster_pipelines {
   # so there is still something to work on
 
   exp_vk                          -> mypkg;
-  exp_twitter    -> dal_twitter   -> mypkg;
-  exp_endomondo  -> dal_endomondo -> mypkg;
-  exp_instapaper -> dal_ip        -> mypkg;
-
-  exp_kobo       -> dal_kobuddy   -> mypkg;
   data_weight                     -> mypkg; # TODO mention orgparse
   data_blood                      -> mypkg; # TODO mention orgparse
 

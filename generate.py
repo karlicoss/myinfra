@@ -434,17 +434,17 @@ def mypkg_promnesia(*, label: str, lid: int):
     aux = node(f'mypkg_aux_{lid}', shape=point)
     # TODO hmm. if I draw labels on these, could be good?
     yield aux
-    yield edge(mypkg, aux, label=label)
+    yield edge(mypkg, aux, label=label, style=dotted)
     yield edge(aux, promnesia)
 
 # TODO multiedges? a -> {b, c}
 # TODO font isn't great..
 mypkg_promnesia_edges = chain.from_iterable(
     mypkg_promnesia(label=l, lid=i) for i, l in enumerate([
-        'FB messenger'
-        'Hypothes.is',
-        'Instapaper',
         'Org files', # TODO that perhaps should link from the filesystem..
+        'my.fbmessenger',
+        'my.hypothesis',
+        'my.instapaper',
         'my.pocket',
         'my.reddit',
         'my.telegram',
@@ -463,10 +463,17 @@ def generate_pipelines() -> str:
         inp_blood,
         scripts,
         exports,
-        dals,
+        # dals,
 
         'subgraph cluster_xxx {',
         mypkg,
+
+        edge('exp_twitter'    , mypkg, label='DAL'), # TODO make more space?
+        edge('exp_endomondo'  , mypkg, label='DAL'),
+        edge('exp_instapaper' , mypkg, label='DAL'),
+        edge('exp_kobo'       , mypkg, label='DAL'),
+        edge('exp_bluemaestro', mypkg),
+
         mypkg_out,
 
         # TODO group together cachew/mypy_err in a table?
