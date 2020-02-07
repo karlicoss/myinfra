@@ -54,7 +54,6 @@ subgraph cluster_pipelines {
 // TODO not sure about the diamond..
 
   "Takeout"   -> takeout_manual     -> exp_takeouts;
-  tg_api      -> tgbackup    -> exp_telegram;
   vk_api      -> vkexport [color=red, label="API closed"];
   vkexport -> exp_vk;
   jb_api      -> jbexport [color=red];
@@ -62,9 +61,6 @@ subgraph cluster_pipelines {
   emfit_api   -> emfitexport -> exp_emfit;
 
   ip_api      -> ipexport   -> exp_instapaper;
-
-  kobo_sqlite -> kobuddy    -> exp_kobo;
-
 
   // TODO PDF annotation software and pdf provider?
 

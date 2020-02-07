@@ -538,10 +538,13 @@ def generate_pipelines() -> str:
         exports,
 
         # TODO maybe, patch stroke in python?
-        edge(tw_api, twexport, E.tw)     , edge(twexport , 'exp_twitter', E.tw),
-        edge(tw_archive, tw_manual, E.tw), edge(tw_manual, 'exp_twitter_archives', E.tw),
+        *edges(tw_api, twexport, 'exp_twitter', E.tw),
+        *edges(tw_archive, tw_manual,'exp_twitter_archives', E.tw),
 
-        edge(end_api, endoexport, E.end), edge(endoexport, 'exp_endomondo', E.end),
+        *edges(end_api, endoexport, 'exp_endomondo', E.end),
+
+        *edges('tg_api', tgbackup, 'exp_telegram', E.tg),
+        *edges('kobo_sqlite', kobuddy, 'exp_kobo', E.kobo),
 
         # TODO hmm, margin look interesting..
         'subgraph cluster_mypkgcl {',
@@ -724,11 +727,14 @@ twittercom = cluster(
 end_api = node(label='API')
 
 col_end = green
+col_kobo = '#bf2026'
 
 class E:
     # TODO warn on conflict?
-    end = dict(arrowhead=diamond, fillcolor=col_end)
-    tw  = dict(arrowhead=diamond, fillcolor=col_twitter)
+    end  = dict(arrowhead=diamond, fillcolor=col_end)
+    tw   = dict(arrowhead=diamond, fillcolor=col_twitter)
+    tg   = dict(arrowhead=diamond, fillcolor=col_tg)
+    kobo = dict(arrowhead=diamond, fillcolor=col_kobo)
 
 
 endomondo = cluster(
@@ -790,7 +796,6 @@ kobo = cluster(
     'kobo_sqlite [label=sqlite]',
     url('https://us.kobobooks.com/products/kobo-aura-one-limited-edition'),
     DEVICE,
-    name='kobo',
     label='Kobo reader',
 )
 
