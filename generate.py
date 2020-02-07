@@ -53,6 +53,11 @@ NOCONSTRAINT = {
 }
 
 
+CYLINDER = {
+    'shape': cylinder,
+}
+
+
 # TODO pipelines could link to sad state
 
 def blog_post(link: str, *args, **kwargs) -> Node:
@@ -172,6 +177,7 @@ emacs = node(
 
 def generate() -> str:
     items = [
+        legend,
         meta,
 
         phone,
@@ -295,6 +301,34 @@ meta = cluster(
     sad_infra,
     edge(brain_coping, sad_infra, **INVIS),
     label='Meta',
+    style=dashed,
+)
+
+legend = cluster(
+    node(
+        'Device',
+        **DEVICE
+    ),
+    node(
+        'Manual step',
+        **MANUAL,
+    ), # TODO order?
+    blog_post(
+        '',
+        label='Entry from my blog',
+        name='legend_blog',
+    ),
+    node(
+        'User interface',
+        **UI,
+    ),
+    # TODO elaborate what's so special about files?
+    node(
+        'Disk storage',
+        **CYLINDER,
+    ),
+    # 'Device -> "Manual step" -> legend_blog',
+    label='Legend',
     style=dashed,
 )
 

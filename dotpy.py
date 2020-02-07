@@ -2,6 +2,7 @@ import sys
 from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
 
+cylinder = 'cylinder'
 diamond = 'diamond'
 point = 'point'
 star  = 'star'
