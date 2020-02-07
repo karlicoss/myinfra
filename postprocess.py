@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import sys
+
 from lxml import etree as ET # type: ignore
 
 NS = '{http://www.w3.org/2000/svg}'
@@ -35,8 +37,8 @@ def fix_edge(e):
     # TODO url?
 
 
-def run(inp: Path) -> ET.ElementTree:
-    root = ET.parse(str(inp))
+def run(inp: bytes) -> ET.ElementTree:
+    root = ET.fromstring(inp)
     edges = root.findall(f'.//{NS}g[@class="edge"]')
 
     for e in edges:
@@ -46,8 +48,10 @@ def run(inp: Path) -> ET.ElementTree:
 
 
 def main():
-    res = run(Path('infra.svg'))
-    Path('patched.svg').write_bytes(ET.tostring(res, pretty_print=True))
+    inp = sys.stdin.read()
+    res = run(inp.encode('utf8'))
+    ress = ET.tostring(res, pretty_print=True).decode('utf8')
+    sys.stdout.write(ress)
 
 
 if __name__ == '__main__':
