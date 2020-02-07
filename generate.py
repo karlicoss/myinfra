@@ -567,9 +567,10 @@ def generate_pipelines() -> str:
         'subgraph cluster_mypkgcl {',
         'subgraph cluster_mypkg_core {',
         'style=invis',
-        mypkg,
-        mypkg_usecases,
         mypkg_tech,
+        mypkg_usecases,
+        mypkg,
+        blog_mypkg,
         '}',
 
         *mypkg_incoming_edges(),
@@ -580,7 +581,6 @@ def generate_pipelines() -> str:
         # add a label 'tecnhiques used'?
         edge(mypkg, mypkg_out),
 
-        blog_mypkg,
         edge(mypkg, blog_mypkg   , **BLOG_EDGE, **NOCONSTRAINT),
         # TODO link separate table with usage examples?
         # edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
