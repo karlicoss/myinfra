@@ -2,8 +2,9 @@ import sys
 from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
 
+diamond = 'diamond'
 point = 'point'
-star = 'star'
+star  = 'star'
 
 dashed = 'dashed'
 dotted = 'dotted'
@@ -145,9 +146,13 @@ def node(name: Optional[str]=None, **kwargs) -> Node:
     return Node(name_=name, extra=kwargs)
 
 
-
-def edge(f: Nodish, t: Nodish, **kwargs) -> Edge:
-    return Edge(f=f, t=t, extra=kwargs)
+def edge(f: Nodish, t: Nodish, *args, **kwargs) -> Edge:
+    # TODO maybe allow multiedges?
+    extra = {**kwargs}
+    for a in args:
+        assert isinstance(a, dict)
+        extra.update(a)
+    return Edge(f=f, t=t, extra=extra)
 
 
 def url(u: str, color=blue) -> Extra:

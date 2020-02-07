@@ -538,10 +538,10 @@ def generate_pipelines() -> str:
         exports,
 
         # TODO maybe, patch stroke in python?
-        edge_tw(tw_api, twexport)     , edge_tw(twexport , 'exp_twitter'),
-        edge_tw(tw_archive, tw_manual), edge_tw(tw_manual, 'exp_twitter_archives'),
+        edge(tw_api, twexport, E.tw)     , edge(twexport , 'exp_twitter', E.tw),
+        edge(tw_archive, tw_manual, E.tw), edge(tw_manual, 'exp_twitter_archives', E.tw),
 
-        edge_end(end_api, endoexport), edge_end(endoexport, 'exp_endomondo'),
+        edge(end_api, endoexport, E.end), edge(endoexport, 'exp_endomondo', E.end),
 
         # TODO hmm, margin look interesting..
         'subgraph cluster_mypkgcl {',
@@ -649,12 +649,15 @@ node [style=invis,shape=point];
 
 
 # TODO eh, these extra nodes are useles..
+
+col_tg = '#0088cc'
 telegram = cluster(
 '''
 tg_api [label=API];
 ''',
     CLOUD,
     url('https://telegram.org'),
+    color=col_tg,
     label='Telegram',
 )
 
@@ -709,10 +712,6 @@ tw_archive = node(
 # TODO map manual steps without intermediate nodes?
 
 col_twitter = lightblue
-def edge_tw(*args, **kwargs):
-    # TODO warn on conflict?
-    return edge(*args, fillcolor=col_twitter, arrowhead='diamond', **kwargs)
-
 
 twittercom = cluster(
     tw_api,
@@ -726,9 +725,10 @@ end_api = node(label='API')
 
 col_end = green
 
-def edge_end(*args, **kwargs):
+class E:
     # TODO warn on conflict?
-    return edge(*args, fillcolor=col_end, arrowhead='diamond', **kwargs)
+    end = dict(arrowhead=diamond, fillcolor=col_end)
+    tw  = dict(arrowhead=diamond, fillcolor=col_twitter)
 
 
 endomondo = cluster(
