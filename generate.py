@@ -431,20 +431,27 @@ mypkg_tech = cluster(
 
 
 def mypkg_promnesia(*, label: str, lid: int):
-    yield edge(mypkg_out, promnesia, label=label)
+    aux = node(f'mypkg_aux_{lid}', shape=point)
+    # TODO hmm. if I draw labels on these, could be good?
+    yield aux
+    yield edge(mypkg, aux, label=label)
+    yield edge(aux, promnesia)
 
 # TODO multiedges? a -> {b, c}
+# TODO font isn't great..
 mypkg_promnesia_edges = chain.from_iterable(
     mypkg_promnesia(label=l, lid=i) for i, l in enumerate([
-        "FB messenger"
-        "Hypothes.is",
-        "Instapaper",
-        "Org files",
-        "Pocket",
-        "Reddit",
-        "Telegram",
-        "Twitter",
-        "VK",
+        'FB messenger'
+        'Hypothes.is',
+        'Instapaper',
+        'Org files', # TODO that perhaps should link from the filesystem..
+        'my.pocket',
+        'my.reddit',
+        'my.telegram',
+        'my.twitter',
+        'my.vk',
+        # TODO ok, think about connecting all mypkg modules (e.g. to dashboard/timeline as well)
+        # 'my.weight',
     ])
 )
 

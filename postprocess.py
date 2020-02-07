@@ -31,7 +31,7 @@ def fix_edge(e):
     t.text = None
     tp = ET.SubElement(t, 'textPath')
     tp.attrib['href'] = '#' + lid
-    tp.attrib['startOffset'] = '10%'
+    tp.attrib['startOffset'] = '30%'
     tp.attrib['side'] = 'right'
     tp.text = label
     # TODO url?
