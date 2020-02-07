@@ -123,8 +123,10 @@ orger_outputs = cluster(
 
 
 # TODO indicate that it's selfhosted?
-syncthing = cluster(
-    'syncthing [style=invis]',
+
+syncthing = node(**INVIS)
+syncthing_cl = cluster(
+    syncthing,
     CLOUD,
     url('https://syncthing.net'),
     color='lightblue', # TODO fill?
@@ -185,7 +187,7 @@ def generate() -> str:
         devices,
         emfit,
         kobo,
-        syncthing,
+        syncthing_cl,
 
         edge(app_endomondo, end_api),
         edge(app_jawbone, jb_api),
