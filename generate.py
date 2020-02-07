@@ -9,6 +9,8 @@ dotpy.init(__name__) # TODO extremely meh
 from dotpy import *
 
 
+debug = False
+
 # TODO lighter boundaries for api bits in services
 
 def gh(x: str) -> str:
@@ -113,6 +115,7 @@ orger = cluster(
     # 'blog_orger -> module_twitter [style=invis]',
     url(gh('karlicoss/orger')),
     label='Orger',
+    style=dashed,
 )
 
 # TODO add .point attribute to cluster?
@@ -125,6 +128,7 @@ orger_outputs = cluster(
     edge(orger_int_node   , '"interative views"'), # TODO
     edge(orger_int_node   , '"todo lists"'),
     label='Org-mode files',
+    style=dashed,
 )
 
 
@@ -498,7 +502,7 @@ def mypkg_module(*, module: str, lid: int):
     label = module.replace('_', '.')
     # ok, multiple dotted -- impossible to see.
     # dashed a bit better but still not great..
-    yield edge(mypkg, aux, label=label, style=dashed, **extra)
+    yield edge(mypkg, aux, label=label, style=dotted, **extra)
 
 
 class my:
@@ -656,6 +660,7 @@ def pipelines():
         # TODO fix url
         # *url(gh('karlicoss/my')),
         'label="my. package"',
+        'style=dashed',
 
         '}',
 
@@ -665,9 +670,7 @@ def pipelines():
 
         # TODO need to reorder?
 
-        # TODO debug mode?
-        # 'style=invisible',
-        'style=dashed',
+        'color=red\nstyle=dashed' if debug else 'style=invisible',
     ]
     return items
 
