@@ -454,19 +454,6 @@ mypkg_tech = cluster(
 )
 
 
-def mypkg_module(*, module: str, lid: int):
-    extra = colmap.get(module, {})
-    # TODO combine colors?
-    # TODO color dots instead?
-
-    aux = node(module, shape=point)
-    yield aux
-    label = module.replace('_', '.')
-    # ok, multiple dotted -- impossible to see.
-    # dashed a bit better but still not great..
-    yield edge(mypkg, aux, label=label, style=dotted, **extra)
-
-
 class my:
     fbm        = 'my_fbmessenger'
     hyp        = 'my_hypothesis'
@@ -480,7 +467,36 @@ class my:
     sleep      = 'my_sleep'
     ex         = 'my_exercise'
     cal        = 'my_calendar'
-    blood      = 'my_blood'
+    blood      = 'my_body_blood'
+
+
+def mymodule_url(module: str) -> Optional[str]:
+    if module in {
+            my.weight, my.sleep, my.ex
+    }:
+        # private atm
+        return None
+    mp = module.replace('_', '/')
+    pp = 'karlicoss/my/blob/master/' + mp
+    addpy = module not in {my.cal} # meh, hacky
+    if addpy:
+        pp += '.py'
+    return gh(pp)
+
+
+def mypkg_module(*, module: str, lid: int):
+    murl = mymodule_url(module)
+
+    extra = colmap.get(module, {})
+    # TODO combine colors?
+    # TODO color dots instead?
+
+    aux = node(module, shape=point)
+    yield aux
+    label = module.replace('_', '.')
+    # ok, multiple dotted -- impossible to see.
+    # dashed a bit better but still not great..
+    yield edge(mypkg, aux, label=label, style=dotted, **extra, **({} if murl is None else url(murl)))
 
 
 
