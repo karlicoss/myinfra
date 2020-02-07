@@ -152,6 +152,7 @@ dashboard = node(
 timeline = node(
     label='Timeline',
     shape=star,
+    **url('https://beepb00p.xyz/tags.html#lifelogging'),
 )
 
 promnesia = node(
@@ -313,6 +314,7 @@ meta = cluster(
     style=dashed,
 )
 
+# TODO colored text is clickable links?
 legend = cluster(
     node(
         'Device',
@@ -399,7 +401,6 @@ exports = cluster(
     'subgraph uuu {',
     against_db,
     mydata,
-
     # TODO ugh. it completely breaks the layout...
     # edge(against_db, mydata),
     '}',
@@ -575,7 +576,7 @@ def _mi(from_, **kwargs):
 def mypkg_incoming_edges():
     return chain.from_iterable([
     _mi('exp_twitter'    , label='DAL', **E.tw),
-    _mi('exp_endomondo'  , label='DAL', **E.end),
+    _mi('exp_endomondo'  , label='DAL', **url(gh('karlicoss/endoexport')), **E.end),
     _mi('exp_instapaper' , label='DAL', **url(gh('karlicoss/instapexport'))),
     _mi('exp_kobo'       , label='DAL', **E.kobo, **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
@@ -613,6 +614,13 @@ def pipelines():
 
         edge(jb_api, 'jbexport', E.jb, color=red),
         edge('jbexport', 'exp_jawbone', E.jb),
+
+        *edges('Takeout', takeout_manual, 'exp_takeouts'),
+        *edges(emfit_api, emfitexport, 'exp_emfit'),
+        *edges('ip_api', ipexport, 'exp_instapaper'),
+
+        edge('vk_api', vkexport, label='API closed', **url('https://github.com/Totktonada/vk_messages_backup/pull/8#issuecomment-494582792', color=red)),
+        edge(vkexport, 'exp_vk'),
 
         # TODO hmm, margin look interesting..
         'subgraph cluster_mypkgcl {',
@@ -681,6 +689,9 @@ def generate_post() -> str:
     tbro = browser('timeline')
     pbro = browser('promnesia')
     items = [
+        edge('exp_takeouts', promnesia, label='Browsing history'),
+        edge('exp_telegram', promnesia, label='Telegram'),
+
         ipython,
 
         dbro,
@@ -757,7 +768,7 @@ google_takeout = node(
 
 blog_takeout_data_gone = blog_post(
     'https://beepb00p.xyz/takeout-data-gone.html',
-    label="Google Takeouts silently\nremoves old data",
+    label="Google Takeout silently\nremoves old data",
 )
 
 # TODO "timeline" can be treated as poor man's api??
