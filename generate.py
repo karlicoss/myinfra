@@ -455,6 +455,31 @@ mypkg_promnesia_edges = chain.from_iterable(
     ])
 )
 
+def _mi(from_, **kwargs):
+    aux = node('mypkg_in_' + from_, shape=point)
+    yield aux
+    yield edge(from_, aux, **kwargs)
+    yield edge(aux, mypkg)
+
+
+mypkg_incoming_edges = chain.from_iterable([
+    _mi('exp_twitter'    , label='DAL'), # TODO make more space?
+    _mi('exp_endomondo'  , label='DAL'),
+    _mi('exp_instapaper' , label='DAL'),
+    _mi('exp_kobo'       , label='DAL'),
+    _mi('exp_bluemaestro'),
+
+    _mi('exp_takeouts'),
+    _mi('exp_twitter_archives'),
+    _mi('exp_jawbone'),
+    _mi('exp_emfit'),
+    _mi('exp_vk'),
+    _mi('data_weight'),
+    _mi('data_blood'),
+    # TODO orgparse
+    # TODO note how this edge is still active despite the fact that jbexport isn't working anymore
+])
+
 # TODO would be nice to add color; in that case node could be 'contaigious' and propagate color
 
 def generate_pipelines() -> str:
@@ -467,12 +492,7 @@ def generate_pipelines() -> str:
 
         'subgraph cluster_xxx {',
         mypkg,
-
-        edge('exp_twitter'    , mypkg, label='DAL'), # TODO make more space?
-        edge('exp_endomondo'  , mypkg, label='DAL'),
-        edge('exp_instapaper' , mypkg, label='DAL'),
-        edge('exp_kobo'       , mypkg, label='DAL'),
-        edge('exp_bluemaestro', mypkg),
+        *mypkg_incoming_edges,
 
         mypkg_out,
 

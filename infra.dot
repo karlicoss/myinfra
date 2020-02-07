@@ -68,17 +68,9 @@ subgraph cluster_pipelines {
 
   // TODO PDF annotation software and pdf provider?
 
-  exp_takeouts                    -> mypkg [label="location data"];
-  exp_twitter_archives            -> mypkg;
-  exp_jawbone                     -> mypkg;
-  # TODO note how this edge is still active despite the fact that jbexport isn't working anymore
-  exp_emfit                       -> mypkg;
   # TODO as you can see not everything has data access layer
   # so there is still something to work on
 
-  exp_vk                          -> mypkg;
-  data_weight                     -> mypkg; # TODO mention orgparse
-  data_blood                      -> mypkg; # TODO mention orgparse
 
 
 scales -> inp_weight -> data_weight;
