@@ -79,6 +79,17 @@ def blog_post(link: str, *args, **kwargs) -> Node:
         **kwargs,
     )  # type: ignore[mise]
 
+
+
+scales = node(
+    **DEVICE,
+)
+
+blood_tests = node(
+    label="Blood testing\nfacilities\n(GP/Thriva/etc)",
+)
+
+
 # TODO FIXME blog edge
 blog_orger = blog_post(
     'https://beepb00p.xyz/orger.html',
@@ -173,14 +184,6 @@ promnesia = node(
     shape=star,
 )
 
-scales = node(
-    **DEVICE,
-)
-
-blood_tests = node(
-    label="Blood testing\nfacilities\n(GP/Thriva/etc)",
-)
-
 
 emacs = node(
     label='Emacs\n(Spacemacs)',
@@ -195,13 +198,7 @@ def generate() -> str:
 
         phone,
 
-        # ugh. cluster is just to enforce ordering?
-        'subgraph cluster_fewfwf {',
-        scales,
-        blood_tests,
-        twittercom,
-        'style=invisible',
-        '}',
+        *cluster_enforce_ordering.render(),
 
         telegram,
         vkcom,
@@ -838,6 +835,11 @@ tw_archive = node(
 # TODO map manual steps without intermediate nodes?
 
 col_twitter = lightblue
+col_end     = green
+col_kobo    = '#bf2026'
+col_jb      = '#540baf'
+col_blood   = red
+col_weight  = 'brown'
 
 twittercom = cluster(
     tw_api,
@@ -847,13 +849,16 @@ twittercom = cluster(
     label='Twitter',
 )
 
-end_api = api_node()
 
-col_end    = green
-col_kobo   = '#bf2026'
-col_jb     = '#540baf'
-col_blood  = 'red'
-col_weight = 'brown'
+cluster_enforce_ordering = cluster(
+    scales,
+    blood_tests,
+    *twittercom.render(),
+    INVIS,
+)
+
+
+end_api = api_node()
 
 class E:
     # TODO warn on conflict?
