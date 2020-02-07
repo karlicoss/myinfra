@@ -385,26 +385,46 @@ scripts = cluster(
     emfitexport,
     scheduler,
 
-    label='Export scripts', # TODO instead of label, show legend for stuff that's actually automatic
+    label='Export scripts', # TODO bit misleading; contains manual?
     style=dashed,
 )
 
+
+data_weight = node(
+    label='org-mode',
+)
+
+data_blood = node(
+    label='org-mode',
+)
+
+exp_twitter = node(
+    label='sqlite',
+)
+
+exp_twitter_archives = node(
+    label='json',
+)
+
+
+# eh. also just to order properly
+cluster_fewfwfjwf = cluster(
+    data_weight,
+    data_blood,
+    exp_twitter,
+    exp_twitter_archives,
+    **INVIS,
+)
+
 # TODO more like 'cluster_fs'?
-#  rankdir=LR;
 exports = cluster(
 '''
     node [shape=cylinder];
     // exp_point [shape=point]; // TODO ughhh. why is everything so hard
 
-    // eh. also just to order properly
-    subgraph cluster_fewjfiewfj {
-    data_weight;
-    data_blood;
-    exp_twitter;
-    exp_twitter_archives;
-    style=invisible;
-    }
-
+''',
+    *cluster_fewfwfjwf.render(),
+'''
     exp_telegram;
     exp_jawbone;
     exp_kobo;
