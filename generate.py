@@ -494,7 +494,7 @@ mypkg_module_edges = chain.from_iterable(
         my.instapaper,
         my.pocket,
         my.reddit,
-        my.tg,
+        # my.tg,
         my.tw,
         my.vk,
         # TODO ok, think about connecting all mypkg modules (e.g. to dashboard/timeline as well)
@@ -513,7 +513,7 @@ mypkg_promnesia_edges = [
         my.instapaper,
         my.pocket,
         my.reddit,
-        my.tg,
+        # my.tg,
         my.tw,
         my.vk,
     }
@@ -639,12 +639,11 @@ def pipelines():
     return items
 
 
-def browser(for_):
-    # return new node deliberately
-    # TODO how to make unique?
+def browser(for_, label='Browser'):
+    # returns new node deliberately, to prevent edge clutter
     return node(
         name=f'browser_for_{for_}',
-        label='Browser',
+        label=label,
         **UI,
     )
 
@@ -654,9 +653,9 @@ ipython = node(
 )
 
 def post():
-    dbro = browser('dashboard')
-    tbro = browser('timeline')
-    pbro = browser('promnesia')
+    dbro = browser('dashboard', label='Browser\n(HTML)')
+    tbro = browser('timeline' , label='Browser\n(HTML)')
+    pbro = browser('promnesia', label='Browser\n(extension)')
     items = [
         edge('exp_takeouts', promnesia, label='Browsing history'),
         edge('exp_telegram', promnesia, label='Telegram'),
