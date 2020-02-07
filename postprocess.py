@@ -11,16 +11,22 @@ def ns(s):
 
 def fix_edge(e):
     eid = e.attrib['id']
+
     lid = 'label_' + eid
 
-    p = e.find(ns('path'))
+    p = e.find('.//' + ns('path'))
 
+    # if eid == 'edge28':
+    #     # print(e.find_all(ns('path')), file=sys.stderr)
+    #     print(p, file=sys.stderr)
+    #     print(eid, file=sys.stderr)
     if p is None:
         return
 
-    t = e.find(ns('text'))
+    t = e.find('.//' + ns('text'))
     if t is None:
         return
+
 
     p.attrib['id'] = lid
 

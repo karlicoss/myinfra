@@ -467,8 +467,8 @@ def _mi(from_, **kwargs):
 mypkg_incoming_edges = chain.from_iterable([
     _mi('exp_twitter'    , label='DAL'), # TODO make more space?
     _mi('exp_endomondo'  , label='DAL'),
-    _mi('exp_instapaper' , label='DAL'),
-    _mi('exp_kobo'       , label='DAL'),
+    _mi('exp_instapaper' , label='DAL', **url(gh('karlicoss/instapexport'))),
+    _mi('exp_kobo'       , label='DAL', **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
 
     _mi('exp_takeouts'),
@@ -493,6 +493,7 @@ def generate_pipelines() -> str:
         # ...
         exports,
 
+        # TODO maybe, patch stroke in python?
         edge_tw(tw_api, twexport)     , edge_tw(twexport , 'exp_twitter'),
         edge_tw(tw_archive, tw_manual), edge_tw(tw_manual, 'exp_twitter_archives'),
 

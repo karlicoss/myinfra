@@ -1,0 +1,5 @@
+#!/bin/bash
+set -eux -o pipefail
+
+./generate.py
+m4 infra.dot | dot -T svg | ./postprocess.py

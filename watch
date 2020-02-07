@@ -1,7 +1,4 @@
 #!/bin/bash -eux
 
-# TODO fixme pipefail?
-
-COMPILE='./generate.py && {m4 infra.dot | dot -T svg | ./postprocess.py > infra.svg}'
 echo -e 'infra.dot\ndiagram.dot\npipelines.dot\npost.dot\npostprocess.py\ngenerate.py' | \
-    entr -s "echo refreshed && ($COMPILE)"
+    entr -s "echo refreshed && (./compile > infra.svg)"
