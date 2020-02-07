@@ -9,6 +9,8 @@ dotpy.init(__name__) # TODO extremely meh
 from dotpy import *
 
 
+# TODO lighter boundaries for api bits in services
+
 def gh(x: str) -> str:
     return f'https://github.com/{x}'
 
@@ -458,9 +460,9 @@ mypkg_promnesia_edges = chain.from_iterable(
 )
 
 def _mi(from_, **kwargs):
-    aux = node('mypkg_in_' + from_, shape=point)
+    aux = node('mypkg_in_' + from_, shape=point) # TODO ugh. invis doesn't help here; it still takes space..
     yield aux
-    yield edge(from_, aux, **kwargs)
+    yield edge(from_, aux, arrowhead='none', **kwargs)
     yield edge(aux, mypkg)
 
 
@@ -498,10 +500,16 @@ def generate_pipelines() -> str:
         edge_tw(tw_archive, tw_manual), edge_tw(tw_manual, 'exp_twitter_archives'),
 
         edge_end(end_api, endoexport), edge_end(endoexport, 'exp_endomondo'),
-        # dals, ??
 
-        'subgraph cluster_xxx {',
+        # TODO hmm, margin look interesting..
+        'subgraph cluster_mypkgcl {',
+        'subgraph cluster_mypkg_core {',
+        'style=invis',
         mypkg,
+        mypkg_usecases,
+        mypkg_tech,
+        '}',
+
         *mypkg_incoming_edges,
 
         mypkg_out,
@@ -513,8 +521,6 @@ def generate_pipelines() -> str:
         blog_mypkg,
         edge(mypkg, blog_mypkg   , **BLOG_EDGE, **NOCONSTRAINT),
         # TODO link separate table with usage examples?
-        mypkg_usecases,
-        mypkg_tech,
         # edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
 
         edge(mypkg_out, orger_point), # TODO not sure if belongs here..
