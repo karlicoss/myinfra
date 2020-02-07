@@ -218,8 +218,9 @@ def generate() -> str:
         edge(app_endomondo, end_api),
         edge(app_jawbone, jb_api),
         edge(emfit_point, emfit_api),
+        # TODO hmm, syncthing could be an edge
         edge(app_bm, syncthing), # TODO here, a rooted script is involved
-        edge(syncthing, 'exp_bluemaestro'),
+        edge(syncthing, exp_bluemaestro),
 
         orger,
         orger_outputs,
@@ -390,21 +391,10 @@ scripts = cluster(
 )
 
 
-data_weight = node(
-    label='org-mode',
-)
-
-data_blood = node(
-    label='org-mode',
-)
-
-exp_twitter = node(
-    label='sqlite',
-)
-
-exp_twitter_archives = node(
-    label='json',
-)
+data_weight = node(label='org-mode')
+data_blood  = node(label='org-mode')
+exp_twitter = node(label='sqlite')
+exp_twitter_archives = node(label='json')
 
 
 # eh. also just to order properly
@@ -416,34 +406,34 @@ cluster_fewfwfjwf = cluster(
     **INVIS,
 )
 
+exp_telegram   = node(label='sqlite')
+exp_jawbone    = node(label='json')
+exp_kobo       = node(label='sqlite')
+exp_takeouts   = node(label='json/html')
+exp_emfit      = node(label='json')
+exp_vk         = node(label='json')
+exp_endomondo  = node(label='json')
+exp_instapaper = node(label='json')
+# ugh. seems like a bug, it should inherit cylinder spect from the cluster
+exp_bluemaestro = node(label='sqlite', **CYLINDER)
+
 # TODO more like 'cluster_fs'?
 exports = cluster(
 '''
     node [shape=cylinder];
-    // exp_point [shape=point]; // TODO ughhh. why is everything so hard
-
 ''',
     *cluster_fewfwfjwf.render(),
-'''
-    exp_telegram;
-    exp_jawbone;
-    exp_kobo;
-    exp_takeouts;
+    exp_telegram,
+    exp_jawbone,
+    exp_kobo,
+    exp_takeouts,
+    exp_emfit,
+    exp_vk,
+    exp_endomondo,
+    exp_instapaper,
+    exp_bluemaestro,
     # TODO mention kython.ktakeout??
-
-    exp_emfit;
-
-
-    exp_vk;
-
-    exp_endomondo;
-    exp_instapaper;
-
-    # TODO mention manual inputs for these..
-
-    exp_bluemaestro [shape=cylinder];
-''',
-    'subgraph uuu {',
+    'subgraph exports_blog {',
     against_db,
     mydata,
     # TODO ugh. it completely breaks the layout...
@@ -457,9 +447,6 @@ exports = cluster(
 # TODO eh, figure out better shape for 'dead'
 # TODO perhaps makes more sense to mark edge?
 
-  #   // exp_point -> exp_telegram [style=dashed, constraint=false];
-  #   // exp_point -> exp_jawbone  [style=dashed, constraint=false];
-  # }
 
 # TODO add reference to data access layer to the graph
 dals = subgraph(
@@ -515,6 +502,7 @@ cachew = node(
 mypkg_out = node('mypkg_out', shape='point')
 # TODO space out mypkg_out nodes?
 
+# TODO not sure...
 mypkg_usecases = cluster(
     blog_hb_kcals,
     label='Usecases',
