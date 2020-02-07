@@ -50,9 +50,10 @@ subgraph cluster_pipelines {
   include(`pipelines.dot')
 }
 
+// TODO hmm red:green:blue could be useful..
+// TODO not sure about the diamond..
+
   "Takeout"   -> takeout_manual     -> exp_takeouts;
-  tw_archive  -> tw_manual   -> exp_twitter_archives;
-  tw_api      -> twexport    -> exp_twitter;
   tg_api      -> tgbackup    -> exp_telegram;
   vk_api      -> vkexport [color=red, label="API closed"];
   vkexport -> exp_vk;
@@ -60,7 +61,6 @@ subgraph cluster_pipelines {
   jbexport -> exp_jawbone;
   emfit_api   -> emfitexport -> exp_emfit;
 
-  end_api     -> endoexport -> exp_endomondo;
   ip_api      -> ipexport   -> exp_instapaper;
 
   kobo_sqlite -> kobuddy    -> exp_kobo;

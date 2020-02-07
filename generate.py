@@ -296,16 +296,18 @@ meta = cluster(
     style=dashed,
 )
 
+twexport = node()
+jbexport = node()
+# jbexport [shape=cds]; // TODO cross out maybe?
 
 scripts = cluster(
-    'twexport',
+    twexport,
     tw_manual,
     vkexport,
     tgbackup,
     endoexport,
     ipexport,
-    'jbexport',
-    # jbexport [shape=cds]; // TODO cross out maybe?
+    jbexport,
     takeout_manual,
     kobuddy,
     emfitexport,
@@ -487,8 +489,15 @@ def generate_pipelines() -> str:
         inp_weight,
         inp_blood,
         scripts,
+
+        # ...
         exports,
-        # dals,
+
+        edge_tw(tw_api, twexport)     , edge_tw(twexport , 'exp_twitter'),
+        edge_tw(tw_archive, tw_manual), edge_tw(tw_manual, 'exp_twitter_archives'),
+
+        edge_end(end_api, endoexport), edge_end(endoexport, 'exp_endomondo'),
+        # dals, ??
 
         'subgraph cluster_xxx {',
         mypkg,
@@ -646,21 +655,34 @@ tw_archive = node(
 
 # TODO map manual steps without intermediate nodes?
 
+col_twitter = lightblue
+def edge_tw(*args, **kwargs):
+    # TODO warn on conflict?
+    return edge(*args, fillcolor=col_twitter, arrowhead='diamond', **kwargs)
+
+
 twittercom = cluster(
     tw_api,
     tw_archive,
     CLOUD,
-    color=lightblue,
+    color=col_twitter,
     label='Twitter',
 )
 
 end_api = node(label='API')
 
+col_end = green
+
+def edge_end(*args, **kwargs):
+    # TODO warn on conflict?
+    return edge(*args, fillcolor=col_end, arrowhead='diamond', **kwargs)
+
+
 endomondo = cluster(
     end_api,
     CLOUD,
     url('https://www.endomondo.com'),
-    color=green,
+    color=col_end,
     label='Endomondo',
 )
 
@@ -772,3 +794,5 @@ if __name__ == '__main__':
 
 # TODO maybe, use html table? not sure..
 # https://renenyffenegger.ch/notes/tools/Graphviz/examples/index
+
+# TODO add hover anchors everywhere
