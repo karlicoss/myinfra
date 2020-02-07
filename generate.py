@@ -364,6 +364,7 @@ exports = cluster(
   #   // exp_point -> exp_jawbone  [style=dashed, constraint=false];
   # }
 
+# TODO add reference to data access layer to the graph
 dals = subgraph(
 '''
     dal_twitter;
@@ -434,10 +435,19 @@ mypkg_tech = cluster(
 
 
 def mypkg_module(*, module: str, lid: int):
+    extra = colmap.get(module, {})
+    if module == my.sleep:
+        # TODO meeeh
+        # I guess I need some automatic model for what is getting combined?
+        extra.update({'color': 'green:blue'})
+    # TODO color dots instead?
+
     aux = node(module, shape=point)
     yield aux
     label = module.replace('_', '.')
-    yield edge(mypkg, aux, label=label, style=dotted)
+    # ok, multiple dotted -- impossible to see.
+    # dashed a bit better but still not great..
+    yield edge(mypkg, aux, label=label, style=dashed, **extra)
 
 
 class my:
@@ -454,6 +464,7 @@ class my:
     ex         = 'my_exercise'
     cal        = 'my_calendar'
     blood      = 'my_blood'
+
 
 
 # TODO multiedges? a -> {b, c}
@@ -502,17 +513,23 @@ mypkg_dashboard_edges = [
 ]
 
 def _mi(from_, **kwargs):
-    aux = node('mypkg_in_' + from_, shape=point) # TODO ugh. invis doesn't help here; it still takes space..
+    pcol = kwargs.get('fillcolor')
+    # TODO hacky..
+    auxcol = {} if pcol is None else dict(color=pcol)
+
+    aux = node('mypkg_in_' + from_, shape=point, **auxcol) # TODO ugh. invis doesn't help here; it still takes space..
     yield aux
-    yield edge(from_, aux, arrowhead='none', **kwargs)
+    # TODO check first..arrowhead='none', 
+    yield edge(from_, aux, **kwargs)
     yield edge(aux, mypkg)
 
 
-mypkg_incoming_edges = chain.from_iterable([
-    _mi('exp_twitter'    , label='DAL'), # TODO make more space?
-    _mi('exp_endomondo'  , label='DAL'),
+def mypkg_incoming_edges():
+    return chain.from_iterable([
+    _mi('exp_twitter'    , label='DAL', **E.tw),
+    _mi('exp_endomondo'  , label='DAL', **E.end),
     _mi('exp_instapaper' , label='DAL', **url(gh('karlicoss/instapexport'))),
-    _mi('exp_kobo'       , label='DAL', **url(gh('karlicoss/kobuddy'))),
+    _mi('exp_kobo'       , label='DAL', **E.kobo, **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
 
     _mi('exp_takeouts'),
@@ -555,7 +572,7 @@ def generate_pipelines() -> str:
         mypkg_tech,
         '}',
 
-        *mypkg_incoming_edges,
+        *mypkg_incoming_edges(),
 
         mypkg_out,
 
@@ -735,6 +752,14 @@ class E:
     tw   = dict(arrowhead=diamond, fillcolor=col_twitter)
     tg   = dict(arrowhead=diamond, fillcolor=col_tg)
     kobo = dict(arrowhead=diamond, fillcolor=col_kobo)
+
+# meh...
+colmap = {
+    my.tw  : E.tw,
+    my.tg  : E.tg,
+    # my.kobo: E.kobo,
+}
+
 
 
 endomondo = cluster(
