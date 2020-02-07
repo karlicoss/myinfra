@@ -10,6 +10,7 @@ star  = 'star'
 dashed = 'dashed'
 dotted = 'dotted'
 filled = 'filled'
+rounded = 'rounded'
 
 lightblue = 'lightblue'
 black  = 'black'

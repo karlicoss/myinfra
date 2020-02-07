@@ -59,6 +59,14 @@ CYLINDER = {
     'shape': cylinder,
 }
 
+AUTO = {
+    'style': rounded,
+}
+
+
+MANUAL = {
+    'shape': 'invtrapezium',
+}
 
 # TODO pipelines could link to sad state
 
@@ -236,6 +244,7 @@ def generate() -> str:
 tgbackup = node(
     label='telegram_backup',
     **url(gh('fabianonline/telegram_backup')),
+    style='rounded',
 )
 
 
@@ -247,29 +256,32 @@ def dead() -> Extra:
 
 vkexport = node(
     **url(gh('Totktonada/vk_messages_backup')),
-    # TODO just unpack dicts if they are in args?
+    **AUTO,
 )
+# TODO just unpack dicts if they are in args?
 
 
 endoexport = node(
     **url(gh('karlicoss/endoexport')),
+    **AUTO,
 )
 
 ipexport = node(
     label='instapexport',
     **url(gh('karlicoss/instapexport')),
+    **AUTO,
 )
 
 kobuddy = node(
     **url(gh('karlicoss/kobuddy')),
+    **AUTO,
 )
 
 emfitexport = node(
     **url(gh('karlicoss/backup-emfit')),
+    **AUTO,
 )
 
-
-MANUAL = {'shape': 'invtrapezium'}
 
 tw_manual = node(
     label='Manual request\n(once)',
@@ -316,7 +328,7 @@ meta = cluster(
     brain_coping,
     sad_infra,
     edge(brain_coping, sad_infra, **INVIS),
-    label='Meta',
+    label="Meta\n(why I'm doing all this?)",
     style=dashed,
 )
 
@@ -327,16 +339,23 @@ legend = cluster(
         **DEVICE
     ),
     node(
-        'Manual step',
+        name='legend_auto',
+        label='Automatic\nscript',
+        **AUTO,
+    ),
+    node(
+        name='legend_manual',
+        label='Manual\nstep',
         **MANUAL,
     ), # TODO order?
     blog_post(
-        '',
+        'https://beepb00p.xyz',
         label='Entry from my blog',
         name='legend_blog',
     ),
     node(
-        'User interface',
+        name='legend_ui',
+        label='User facing\ninterface',
         **UI,
     ),
     # TODO elaborate what's so special about files?
@@ -349,8 +368,8 @@ legend = cluster(
     style=dashed,
 )
 
-twexport = node()
-jbexport = node()
+twexport = node(**AUTO)
+jbexport = node(**AUTO)
 # jbexport [shape=cds]; // TODO cross out maybe?
 
 scripts = cluster(
@@ -945,8 +964,9 @@ devices = cluster(
     *emfit.render(),
     *kobo.render(),
 
-    label='Devices',
-    style=dashed,
+    # label='Devices',
+    # style=dashed,
+    INVIS,
 )
 
 
