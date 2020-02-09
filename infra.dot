@@ -18,7 +18,13 @@ digraph G {
 
   // concatenate=true; // eh, doesn't seem to work..
 
-  node [shape="box"];
+  // TODO eh? it just moves edges a bit, not sure how useful otherwise...
+  // searchsize=500;
+
+  node [
+        shape="box"
+        // margin=0
+  ]
   // rankdir="LR";
 
   // hmm. used to have this as 'max', but same works a bit neater..

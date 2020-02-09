@@ -1024,3 +1024,5 @@ if __name__ == '__main__':
 # https://renenyffenegger.ch/notes/tools/Graphviz/examples/index
 
 # TODO add hover anchors everywhere
+
+# TODO hmm, use xlabel? it doesn't impact layout, might be useful for edges?

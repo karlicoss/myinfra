@@ -27,7 +27,6 @@ def fix_edge(e):
     if t is None:
         return
 
-
     p.attrib['id'] = lid
 
     del t.attrib['x']
@@ -43,12 +42,33 @@ def fix_edge(e):
     # TODO url?
 
 
+def fix_node(n):
+    nid = n.attrib['id']
+
+    t = n.find('.//' + ns('text'))
+    if t is None:
+        return
+
+    # this is a bit questionable, but it doesn't seem that fragments work for svg
+    # it kind of jumps somewhere, but it doesn't jump at the start of the cluster/node
+    # whereas on text nodes, it works fine
+    t.attrib['id'] = nid
+    del n.attrib['id']
+
+
 def run(inp: bytes) -> ET.ElementTree:
     root = ET.fromstring(inp)
+    st = ET.SubElement(root, 'style')
+    st.text = STYLE
     edges = root.findall(f'.//{NS}g[@class="edge"]')
 
     for e in edges:
         fix_edge(e)
+
+    nodes    = root.findall(f'.//{NS}g[@class="node"]')
+    clusters = root.findall(f'.//{NS}g[@class="cluster"]')
+    for n in [*nodes, *clusters]:
+        fix_node(n)
 
     return root
 
@@ -58,6 +78,13 @@ def main():
     res = run(inp.encode('utf8'))
     ress = ET.tostring(res, pretty_print=True).decode('utf8')
     sys.stdout.write(ress)
+
+
+STYLE = '''
+#tnode16:hover {
+    font-family: monospace;
+}
+'''
 
 
 if __name__ == '__main__':
