@@ -974,14 +974,17 @@ def generate() -> str:
         devices,
         emfit,
         kobo,
-        syncthing_cl,
+        syncthing_cl, # TODO maybe should't be a sluster??
 
         edge(app_endomondo, end_api),
         edge(app_jawbone, jb_api),
         edge(emfit_point, emfit_api),
         # TODO hmm, syncthing could be an edge
-        edge(app_bm, syncthing), # TODO here, a rooted script is involved
-        edge(syncthing, exp_bluemaestro),
+
+
+        *edges(app_bm, syncthing, exp_bluemaestro), # TODO here, a rooted script is involved
+        # TODO not sure about that..
+        # *edges(app_bm, exp_bluemaestro, label='Syncthing'),
 
         orger,
         orger_outputs,
