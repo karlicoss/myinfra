@@ -16,10 +16,6 @@ def fix_edge(e):
 
     p = e.find('.//' + ns('path'))
 
-    # if eid == 'edge28':
-    #     # print(e.find_all(ns('path')), file=sys.stderr)
-    #     print(p, file=sys.stderr)
-    #     print(eid, file=sys.stderr)
     if p is None:
         return
 
@@ -42,6 +38,7 @@ def fix_edge(e):
     # TODO url?
 
 
+# TODO rename?
 def fix_node(n):
     nid = n.attrib['id']
 
@@ -60,15 +57,46 @@ def run(inp: bytes) -> ET.ElementTree:
     root = ET.fromstring(inp)
     st = ET.SubElement(root, 'style')
     st.text = STYLE
-    edges = root.findall(f'.//{NS}g[@class="edge"]')
 
+    ## make edge labels follow the curve
+    # TODO not sure if should use xlabel?
+    edges = root.findall(f'.//{NS}g[@class="edge"]')
     for e in edges:
         fix_edge(e)
+    ##
 
-    nodes    = root.findall(f'.//{NS}g[@class="node"]')
-    clusters = root.findall(f'.//{NS}g[@class="cluster"]')
-    for n in [*nodes, *clusters]:
-        fix_node(n)
+    ## for some reason, svg figures are not nested in graphviz output
+    figures = root.findall(f'.//{NS}g')
+    for fig in figures:
+        classes = fig.attrib.get('class', '').split()
+        # right, seems lxml doesn't support contains(@class, "node") ???
+        if 'node' not in classes:
+            continue
+        node = fig
+
+        # find the target clusrer id
+        CLUST = '_clust_' # see dotpy subgraph() code
+        classes = [c for c in classes if c.startswith(CLUST)]
+        if len(classes) == 0:
+            continue
+        [cls] = classes
+        clid = cls[len(CLUST):]
+        #
+
+        cluster = root.find(f'.//{NS}g[@id="{clid}"]')
+        assert cluster is not None
+
+        # reattach to become its child
+        node.getparent().remove(node)
+        cluster.append(node)
+    ##
+
+    ## for some reason, #fragment links don't work properly against clusters
+    figures = root.findall(f'.//{NS}g')
+    clusters = (n for n in figures if 'cluster' in n.attrib.get('class', '').split())
+    for cl in clusters:
+        fix_node(cl)
+    ##
 
     return root
 
@@ -80,9 +108,18 @@ def main():
     sys.stdout.write(ress)
 
 
+# TODO right, also node doesn't know its cluster...
+
+# apparently only these are allowed? https://www.w3.org/TR/SVG11/attindex.html#PresentationAttributes
+# TODO add a floating button to drop selection?
+# ok, that could be a good way of highlighting...
+
+# huh ok, nice so this sort of works..
 STYLE = '''
-#tnode16:hover {
-    font-family: monospace;
+/* relies on target hack in dotpy!!! */
+text:target ~ .node text {
+    fill: red;
+    font-weight: bold;
 }
 '''
 

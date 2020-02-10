@@ -129,6 +129,10 @@ def subgraph(
 ) -> Subgraph:
     mclass = {} if klass is None else {'class': klass}
     kw = {**kwargs, **mclass}
+
+    clid = kwargs.get('id') # TODO might be nice to make it automatic?
+    mid = {} if clid is None else {'class': '_clust_' + clid}
+
     def it() -> Iterable[str]:
         for x in args:
             if isinstance(x, dict):
@@ -142,7 +146,8 @@ def subgraph(
                 # a) do not violate immutability
                 # b) wrap str in Node anyway
                 # c) pass this to Edge as well
-                x.extra.update(mclass)
+                # x.extra.update(mclass)
+                x.extra.update(mid)
                 yield from x.render()
             elif isinstance(x, Edge):
                 yield from x.render()

@@ -393,6 +393,8 @@ exports = cluster(
     style=dashed,
     color=black,
     label='Filesystem',
+
+    id='filesystem', # ok, relying on ids makes sense
 )
 
 # TODO add reference to data access layer to the graph
