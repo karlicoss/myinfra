@@ -133,11 +133,15 @@ def subgraph(
     clid = kwargs.get('id') # TODO might be nice to make it automatic?
     mid = {} if clid is None else {'class': '_clust_' + clid}
 
+    # TODO I guess here id is more of a special node_id and needs to be passed down...
+
     def it() -> Iterable[str]:
         for x in args:
             if isinstance(x, dict):
                 # TODO a bit horrible..
                 kw.update(x)
+            elif isinstance(x, Subgraph):
+                yield from x.render()
             elif isinstance(x, str):
                 yield x
             elif isinstance(x, Node):

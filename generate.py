@@ -371,7 +371,7 @@ cluster_fewfwfjwf = cluster(
 # TODO more like 'cluster_fs'?
 exports = cluster(
     'node [shape=cylinder]',
-    *cluster_fewfwfjwf.render(),
+    cluster_fewfwfjwf,
     exp_reddit,
     exp_telegram,
     exp_jawbone,
@@ -938,8 +938,8 @@ devices = cluster(
     bluemaestro,
     edge(bluemaestro, app_bm, label='BT'),
 
-    *emfit.render(),
-    *kobo.render(),
+    emfit,
+    kobo,
 
     # label='Devices',
     # style=dashed,
@@ -950,8 +950,8 @@ devices = cluster(
 cluster_enforce_ordering = cluster(
     scales,
     blood_tests,
-    *twittercom.render(),
-    *telegram.render(),
+    twittercom,
+    telegram,
     INVIS,
 )
 
@@ -963,7 +963,7 @@ def generate() -> str:
 
         phone,
 
-        *cluster_enforce_ordering.render(),
+        cluster_enforce_ordering,
 
         reddit,
         # telegram,
