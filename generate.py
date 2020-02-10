@@ -336,6 +336,8 @@ scripts = cluster(
 
     label='Export scripts', # TODO bit misleading; contains manual?
     style=dashed,
+
+    id='exports',
 )
 
 
@@ -359,19 +361,26 @@ exp_bluemaestro = node(label='sqlite', **CYLINDER)
 
 
 # eh. also just to order properly
-cluster_fewfwfjwf = cluster(
-    data_weight,
-    data_blood,
-    exp_twitter,
-    exp_twitter_archives,
-    **INVIS,
-)
+# cluster_fewfwfjwf = cluster(
+# )
 
 
 # TODO more like 'cluster_fs'?
 exports = cluster(
     'node [shape=cylinder]',
-    cluster_fewfwfjwf,
+
+    'subgraph cluster_just_to_enforce_order {',
+    data_weight,
+    data_blood,
+    exp_twitter,
+    exp_twitter_archives,
+    'style=invis'
+    '}',
+
+    # cluster_fewfwfjwf,
+
+
+
     exp_reddit,
     exp_telegram,
     exp_jawbone,
@@ -394,7 +403,7 @@ exports = cluster(
     color=black,
     label='Filesystem',
 
-    id='filesystem', # ok, relying on ids makes sense
+    id='fs', # ok, relying on ids makes sense
 )
 
 # TODO add reference to data access layer to the graph

@@ -133,12 +133,14 @@ def subgraph(
     clid = kwargs.get('id') # TODO might be nice to make it automatic?
     mid = {} if clid is None else {'class': '_clust_' + clid}
 
-    # TODO I guess here id is more of a special node_id and needs to be passed down...
+    # TODO ugh. right, don't think that rendering during construction was a good idea...
+    # perhaps need to write few tests and fix it properly...
 
     def it() -> Iterable[str]:
         for x in args:
             if isinstance(x, dict):
                 # TODO a bit horrible..
+                # TODO also incorrect if we got inline bits of strings (e.g. adhoc 'subgraph whatever {')
                 kw.update(x)
             elif isinstance(x, Subgraph):
                 yield from x.render()
