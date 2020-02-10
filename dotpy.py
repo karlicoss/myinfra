@@ -120,16 +120,29 @@ def _render(*args: str, **kwargs):
 
 
 SubgraphItem = Union[str, Dict, Node, Edge]
-def subgraph(*args: SubgraphItem, name: Optional[str]=None, cluster: bool=False, **kwargs) -> Subgraph:
-    kw = {**kwargs}
+def subgraph(
+        *args: SubgraphItem,
+        name: Optional[str]=None,
+        cluster: bool=False,
+        klass: Optional[str]=None,
+        **kwargs,
+) -> Subgraph:
+    mclass = {} if klass is None else {'class': klass}
+    kw = {**kwargs, **mclass}
     def it() -> Iterable[str]:
         for x in args:
-            if isinstance(x, str):
-                yield x
-            elif isinstance(x, dict):
+            if isinstance(x, dict):
                 # TODO a bit horrible..
                 kw.update(x)
+            elif isinstance(x, str):
+                yield x
             elif isinstance(x, Node):
+                # TODO right, this is pretty horrible...
+                # I guess I need to
+                # a) do not violate immutability
+                # b) wrap str in Node anyway
+                # c) pass this to Edge as well
+                x.extra.update(mclass)
                 yield from x.render()
             elif isinstance(x, Edge):
                 yield from x.render()
