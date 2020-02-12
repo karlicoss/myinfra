@@ -60,9 +60,13 @@ def run(inp: bytes) -> ET.ElementTree:
 
     ## make edge labels follow the curve
     # TODO not sure if should use xlabel?
-    edges = root.findall(f'.//{NS}g[@class="edge"]')
-    for e in edges:
-        fix_edge(e)
+    figures = root.findall(f'.//{NS}g')
+    for fig in figures:
+        classes = fig.attrib.get('class', '').split()
+        if 'edge' not in classes:
+            continue
+        edge = fig 
+        fix_edge(edge)
     ##
 
     ## for some reason, svg figures are not nested in graphviz output
