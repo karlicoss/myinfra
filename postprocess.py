@@ -32,10 +32,11 @@ def fix_edge(e):
     t.text = None
     tp = ET.SubElement(t, 'textPath')
     tp.attrib['href'] = '#' + lid
-    tp.attrib['startOffset'] = '7%' # TODO ok, maybe needs to be configurable..
+    offset = 30 if label == 'DAL' else 7 # TODO FIXME horrible..
+    tp.attrib['startOffset'] = f'{offset}%'
     tp.attrib['side'] = 'right'
     tp.text = label
-    # TODO url?
+    # TODO would be nice to add some padding as well, but not sure if it's possible
 
 
 def fix_id(n):
