@@ -38,8 +38,7 @@ def fix_edge(e):
     # TODO url?
 
 
-# TODO rename?
-def fix_node(n):
+def fix_id(n):
     nid = n.attrib['id']
 
     t = n.find('.//' + ns('text'))
@@ -96,10 +95,12 @@ def run(inp: bytes) -> ET.ElementTree:
     ##
 
     ## for some reason, #fragment links don't work properly against clusters
+    ## I think svg only likes them on text
     figures = root.findall(f'.//{NS}g')
-    clusters = (n for n in figures if 'cluster' in n.attrib.get('class', '').split())
-    for cl in clusters:
-        fix_node(cl)
+    for fig in figures:
+        classes = fig.attrib.get('class', '').split()
+        if 'cluster' in classes or 'edge' in classes:
+            fix_id(fig)
     ##
 
     return root
