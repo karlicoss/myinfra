@@ -588,8 +588,8 @@ def mypkg_incoming_edges():
     return chain.from_iterable([
     _mi('exp_reddit'     , label='DAL', **E.reddit, **url(gh('karlicoss/rexport'))),
     _mi('exp_twitter'    , label='DAL', **E.tw),
-    _mi('exp_endomondo'  , label='DAL', **url(gh('karlicoss/endoexport')), **E.end),
-    _mi('exp_instapaper' , label='DAL', **url(gh('karlicoss/instapexport'))),
+    _mi('exp_endomondo'  , label='DAL', **E.end,    **url(gh('karlicoss/endoexport')), id='dal'), # eh. id here is kinda arbitrary...
+    _mi('exp_instapaper' , label='DAL',             **url(gh('karlicoss/instapexport'))),
     _mi('exp_kobo'       , label='DAL', **E.kobo, **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
 
