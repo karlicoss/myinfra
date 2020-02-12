@@ -13,6 +13,7 @@ filled = 'filled'
 rounded = 'rounded'
 
 lightblue = 'lightblue'
+darkgreen = 'darkgreen'
 black  = 'black'
 blue   = 'blue'
 gray   = 'gray'
@@ -192,7 +193,11 @@ def edge(*args, **kwargs) -> Edge:
     return e
 
 
-def url(u: str, color=blue) -> Extra:
+EXTERNAL = blue
+INTERNAL = darkgreen
+def url(u: str, color=EXTERNAL) -> Extra:
+    if u.startswith('#'):
+        color = INTERNAL
     return {
         'URL': u,
         'fontcolor': color, # meh
