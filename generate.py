@@ -454,6 +454,7 @@ mypkg_usecases = cluster(
     blog_hb_kcals,
     label='Usecases',
     style=dashed,
+    # TODO diff stroke color?
 )
 
 mypkg_tech = cluster(
@@ -589,6 +590,45 @@ def mypkg_incoming_edges():
 
 # TODO would be nice to add color; in that case node could be 'contaigious' and propagate color
 
+def mypkgcl():
+    return cluster(
+        cluster(
+            mypkg_tech,
+            mypkg_usecases,
+            mypkg,
+            blog_mypkg,
+            INVIS,
+            name='mypkg_core',
+        ),
+
+        *mypkg_incoming_edges(),
+
+        mypkg_out,
+
+        # TODO group together cachew/mypy_err in a table?
+        # add a label 'tecnhiques used'?
+        edge(mypkg, mypkg_out),
+
+        edge(mypkg, blog_mypkg   , **BLOG_EDGE, **NOCONSTRAINT),
+        # TODO link separate table with usage examples?
+        # edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
+
+        edge(mypkg_out, orger_point), # TODO not sure if belongs here..
+
+        *mypkg_module_edges,
+        *mypkg_promnesia_edges,
+        *mypkg_dashboard_edges,
+
+        # *url(gh('karlicoss/my')),
+        url('#mypkg'),
+        label='my. package',
+        id='mypkg',
+
+
+        style=dashed,
+        name='mypkgcl',
+    )
+
 def pipelines():
     items = [
         inp_weight,
@@ -619,41 +659,7 @@ def pipelines():
         edge(vkexport, 'exp_vk'),
 
         # TODO hmm, margin look interesting..
-        'subgraph cluster_mypkgcl {',
-        'subgraph cluster_mypkg_core {',
-        'style=invis',
-        mypkg_tech,
-        mypkg_usecases,
-        mypkg,
-        blog_mypkg,
-        '}',
-
-        *mypkg_incoming_edges(),
-
-        mypkg_out,
-
-        # TODO group together cachew/mypy_err in a table?
-        # add a label 'tecnhiques used'?
-        edge(mypkg, mypkg_out),
-
-        edge(mypkg, blog_mypkg   , **BLOG_EDGE, **NOCONSTRAINT),
-        # TODO link separate table with usage examples?
-        # edge(blog_mypkg, blog_hb_kcals, **INVIS), # TODO mark this edge as special, merely for ordering?
-
-        edge(mypkg_out, orger_point), # TODO not sure if belongs here..
-
-        *mypkg_module_edges,
-        *mypkg_promnesia_edges,
-        *mypkg_dashboard_edges,
-
-        # TODO extract cluster?
-        # TODO fix url
-        # TODO FIXME also add ID
-        # *url(gh('karlicoss/my')),
-        'label="my. package"',
-        'style=dashed',
-
-        '}',
+        mypkgcl(),
 
         # edge(mypkg, 'alala'),
         # edge('alala', promnesia),
@@ -665,6 +671,7 @@ def pipelines():
     ]
     return items
 
+# TODO FIXME remove nodes when there is no data access layer??
 
 def browser(for_, label='Browser'):
     # returns new node deliberately, to prevent edge clutter
