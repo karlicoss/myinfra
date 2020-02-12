@@ -295,7 +295,7 @@ legend = cluster(
     ), # TODO order?
     blog_post(
         'https://beepb00p.xyz',
-        label='Entry from my blog',
+        label='Entry from my blog\n(clickable)',
         name='legend_blog',
     ),
     node(
@@ -410,7 +410,7 @@ filesystem = cluster(
 
 mypkg = node(
     **url('https://github.com/karlicoss/my'),
-    # label='my. package',
+    label='import my',
 )
 
 blog_mypkg = blog_post(
@@ -561,6 +561,21 @@ def _mi(from_, **kwargs):
     # TODO hacky..
     auxcol = {} if pcol is None else dict(color=pcol)
 
+    node_shape = point
+    label = kwargs.get('label')
+    if label != 'DAL': # TODO how to link to 'data access layer'??
+        # hacky...
+        # TODO maybe do the opposite? if dal, then arrowhead
+        kwargs['arrowhead'] = 'none'
+        auxcol.update(dict(
+            color=black,
+            style=point,
+            # meh, but works...
+            fixedsize='true',
+            width=0.02,
+            height=0.02,
+        ))
+    # shap 
     aux = node('mypkg_in_' + from_, shape=point, **auxcol) # TODO ugh. invis doesn't help here; it still takes space..
     yield aux
     # TODO check first..arrowhead='none', 
