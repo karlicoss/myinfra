@@ -575,10 +575,11 @@ def _mi(from_, **kwargs):
             width=0.02,
             height=0.02,
         ))
-    # shap 
+    else:
+        kwargs['class'] = 'dal_edge'
     aux = node('mypkg_in_' + from_, shape=point, **auxcol) # TODO ugh. invis doesn't help here; it still takes space..
     yield aux
-    # TODO check first..arrowhead='none', 
+    # TODO check first..arrowhead='none',
     yield edge(from_, aux, **kwargs)
     yield edge(aux, mypkg)
 
