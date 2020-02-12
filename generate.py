@@ -69,7 +69,6 @@ MANUAL = {
 }
 
 
-
 # TODO pipelines could link to sad state
 
 def blog_post(link: str, *args, **kwargs) -> Node:
@@ -320,7 +319,7 @@ jbexport = node(**AUTO)
 
 rexport = node(**AUTO, **url(gh('karlicoss/rexport')))
 
-scripts = cluster(
+exports = cluster(
     twexport,
     tw_manual,
     vkexport,
@@ -338,6 +337,7 @@ scripts = cluster(
     style=dashed,
 
     id='exports',
+    **url('#exports'), # TODO show anchor sign?
 )
 
 
@@ -365,8 +365,7 @@ exp_bluemaestro = node(label='sqlite', **CYLINDER)
 # )
 
 
-# TODO more like 'cluster_fs'?
-exports = cluster(
+filesystem = cluster(
     'node [shape=cylinder]',
 
     'subgraph cluster_just_to_enforce_order {',
@@ -392,7 +391,7 @@ exports = cluster(
     exp_instapaper,
     exp_bluemaestro,
     # TODO mention kython.ktakeout??
-    'subgraph exports_blog {',
+    'subgraph filesystem_blog {',
     against_db,
     mydata,
     # TODO ugh. it completely breaks the layout...
@@ -402,8 +401,8 @@ exports = cluster(
     style=dashed,
     color=black,
     label='Filesystem',
-
     id='fs', # ok, relying on ids makes sense
+    **url("#fs"),
 )
 
 # TODO add reference to data access layer to the graph
@@ -594,10 +593,10 @@ def pipelines():
     items = [
         inp_weight,
         inp_blood,
-        scripts,
+        exports,
 
         # ...
-        exports,
+        filesystem,
 
         # TODO maybe, patch stroke in python?
         *edges(tw_api, twexport, 'exp_twitter', E.tw),
@@ -649,6 +648,7 @@ def pipelines():
 
         # TODO extract cluster?
         # TODO fix url
+        # TODO FIXME also add ID
         # *url(gh('karlicoss/my')),
         'label="my. package"',
         'style=dashed',
