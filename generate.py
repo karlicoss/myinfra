@@ -280,7 +280,8 @@ dataliberation = blog_post(
 meta = cluster(
     brain_coping,
     sad_infra,
-    edge(brain_coping, sad_infra, **INVIS),
+    mydata,
+    *edges(brain_coping, sad_infra, **INVIS),
     label="Meta\n(why I'm doing all this?)",
     style=dashed,
 )
@@ -402,7 +403,6 @@ filesystem = cluster(
     # TODO mention kython.ktakeout??
     'subgraph filesystem_blog {',
     against_db,
-    mydata,
     # TODO ugh. it completely breaks the layout...
     # edge(against_db, mydata),
     '}',
