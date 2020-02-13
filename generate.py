@@ -16,6 +16,9 @@ debug = False
 def gh(x: str) -> str:
     return f'https://github.com/{x}'
 
+def bb(x: str) -> str:
+    return f'https://beeob00p.xyz/{x}'
+
 
 BLOG_COLOR = purple
 
@@ -87,7 +90,12 @@ scales = node(
 )
 
 blood_tests = node(
-    label="Blood testing\nfacilities\n(GP/Thriva/etc)",
+    label='Blood tests\n(GP/Thriva/etc)',
+)
+
+sleep_subj = node(
+    label='Sleep data\n(subjective)', # TODO link?
+    **url(bb('my-data.html#sleep')),
 )
 
 
@@ -240,9 +248,6 @@ takeout_manual = node(
 )
 
 
-def bb(s):
-    return f'https://beeob00p.xyz/{s}'
-
 against_db = blog_post(
     bb('unnecessary-db.html'),
     label='Against\nunnecessary databases',
@@ -353,6 +358,7 @@ exports = cluster(
 
 data_weight = node(label='org-mode')
 data_blood  = node(label='org-mode')
+data_sleep  = node(label='org-mode')
 exp_twitter = node(label='sqlite')
 exp_twitter_archives = node(label='json')
 
@@ -381,6 +387,7 @@ filesystem = cluster(
     'subgraph cluster_just_to_enforce_order {',
     data_weight,
     data_blood,
+    data_sleep,
     exp_twitter,
     exp_twitter_archives,
     'style=invis'
@@ -445,6 +452,10 @@ inp_blood = node(
     **MANUAL,
 ) # TODO once in several month?
 
+inp_sleep = node(
+    label='Manual\ninput',
+    **MANUAL,
+)
 
 mypy_err = blog_post(
     'https://beepb00p.xyz/mypy-error-handling.html',
@@ -658,6 +669,7 @@ def mypkgcl():
 def pipelines():
     items = [
         inp_weight,
+        inp_sleep,
         inp_blood,
         exports,
 
@@ -736,8 +748,9 @@ def post():
         edge(mypkg_out, timeline),
 
 
-        *edges(blood_tests, inp_blood, 'data_blood', **E.blood),
-        *edges(scales, inp_weight, 'data_weight', **E.weight),
+        *edges(blood_tests, inp_blood , data_blood , **E.blood),
+        *edges(scales     , inp_weight, data_weight, **E.weight),
+        *edges(sleep_subj , inp_sleep , data_sleep),
 
     ]
     return items
@@ -993,10 +1006,9 @@ devices = cluster(
 
 
 cluster_enforce_ordering = cluster(
+    sleep_subj,
     scales,
     blood_tests,
-    twittercom,
-    telegram,
     INVIS,
 )
 
@@ -1009,6 +1021,8 @@ def generate() -> str:
         phone,
 
         cluster_enforce_ordering,
+        telegram,
+        twittercom,
 
         reddit,
         # telegram,
