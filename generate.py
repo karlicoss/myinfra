@@ -119,6 +119,9 @@ def orger_static() -> List[str]:
         'kobo',
         'twitter',
         'instapaper',
+        'youtube',
+        'hypothesis',
+        'github',
         # TODO actually get them straight from orger modules?
     ]
 
@@ -126,6 +129,8 @@ def orger_todos() -> List[str]:
     return [
         'kobo2org',
         'ip2org',
+        'reddit',
+        'hackernews',
     ]
 
 orger_static_node = node(
