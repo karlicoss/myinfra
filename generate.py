@@ -599,8 +599,8 @@ def mypkg_incoming_edges():
     _mi('exp_reddit'     , label='DAL', **E.reddit, **url(gh('karlicoss/rexport'))),
     _mi('exp_twitter'    , label='DAL', **E.tw),
     _mi('exp_endomondo'  , label='DAL', **E.end,    **url(gh('karlicoss/endoexport')), id='dal'), # eh. id here is kinda arbitrary...
-    _mi('exp_instapaper' , label='DAL',             **url(gh('karlicoss/instapexport'))),
-    _mi('exp_kobo'       , label='DAL', **E.kobo, **url(gh('karlicoss/kobuddy'))),
+    _mi('exp_instapaper' , label='DAL', **E.ip,     **url(gh('karlicoss/instapexport'))),
+    _mi('exp_kobo'       , label='DAL', **E.kobo,   **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
 
     _mi('exp_takeouts'),
@@ -668,7 +668,7 @@ def pipelines():
         *edges(tw_api, twexport, 'exp_twitter', E.tw),
         *edges(tw_archive, tw_manual,'exp_twitter_archives', E.tw),
 
-        *edges(end_api, endoexport, 'exp_endomondo', E.end),
+        *edges(end_api, endoexport, exp_endomondo, E.end),
 
         *edges(tg_api, tgbackup, exp_telegram, E.tg),
         *edges(reddit_api, rexport, 'exp_reddit', E.reddit),
@@ -679,7 +679,7 @@ def pipelines():
 
         *edges('Takeout', takeout_manual, 'exp_takeouts'),
         *edges(emfit_api, emfitexport, 'exp_emfit'),
-        *edges('ip_api', ipexport, 'exp_instapaper'),
+        *edges(ip_api, ipexport, exp_instapaper, E.ip),
 
         edge('vk_api', vkexport, label='API closed', **url('https://github.com/Totktonada/vk_messages_backup/pull/8#issuecomment-494582792'), color=red),
         edge(vkexport, 'exp_vk'),
@@ -836,6 +836,7 @@ col_jb      = '#540baf'
 col_blood   = red
 col_weight  = 'brown'
 col_reddit  = 'pink'
+col_ip      = 'lightgray'
 
 
 tw_api = api_node()
@@ -873,6 +874,7 @@ class E:
     blood  = dict(arrowhead=diamond, fillcolor=col_blood)
     weight = dict(arrowhead=diamond, fillcolor=col_weight)
     reddit = dict(arrowhead=diamond, fillcolor=col_reddit)
+    ip     = dict(arrowhead=diamond, fillcolor=col_ip)
 
 # meh...
 colmap = {
@@ -883,6 +885,7 @@ colmap = {
     my.blood : E.blood,
     my.weight: E.weight,
     my.reddit: E.reddit,
+    my.instapaper: E.ip,
 }
 
 
@@ -902,7 +905,7 @@ instapaper = cluster(
     ip_api,
     CLOUD,
     url('https://www.instapaper.com'),
-    color='lightgray', # TODO for other as well?
+    color=col_ip,
     label='Instapaper',
 )
 
