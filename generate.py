@@ -337,7 +337,8 @@ twexport = node(**AUTO)
 jbexport = node(**AUTO)
 # jbexport [shape=cds]; // TODO cross out maybe?
 
-rexport = node(**AUTO, **url(gh('karlicoss/rexport')))
+rexport    = node(**AUTO, **url(gh('karlicoss/rexport')))
+pinbexport = node(**AUTO, **url(gh('karlicoss/pinbexport')))
 
 exports = cluster(
     twexport,
@@ -345,6 +346,7 @@ exports = cluster(
     vkexport,
     tgbackup,
     rexport,
+    pinbexport,
     endoexport,
     ipexport,
     jbexport,
@@ -370,6 +372,7 @@ exp_twitter_archives = node(label='json')
 
 
 exp_reddit     = node(label='json')
+exp_pinb       = node(label='json')
 exp_telegram   = node(label='sqlite')
 exp_jawbone    = node(label='json')
 exp_kobo       = node(label='sqlite')
@@ -399,6 +402,7 @@ filesystem = cluster(
 
     exp_telegram,
     exp_reddit,
+    exp_pinb,
     exp_twitter,
     exp_twitter_archives,
     exp_jawbone,
@@ -501,6 +505,7 @@ class my:
     ex         = 'my_exercise'
     cal        = 'my_calendar'
     blood      = 'my_body_blood'
+    pinboard   = 'my_pinboard'
 
 
 def mymodule_url(module: str) -> Optional[str]:
@@ -546,6 +551,7 @@ mypkg_module_edges = chain.from_iterable(
         # my.tg,
         my.tw,
         my.vk,
+        my.pinboard,
         # TODO ok, think about connecting all mypkg modules (e.g. to dashboard/timeline as well)
         my.weight,
         my.sleep,
@@ -565,6 +571,7 @@ mypkg_promnesia_edges = [
         # my.tg,
         my.tw,
         my.vk,
+        my.pinboard,
     }
 ]
 
@@ -610,6 +617,7 @@ def _mi(from_, **kwargs):
 def mypkg_incoming_edges():
     return chain.from_iterable([
     _mi('exp_reddit'     , label='DAL', **E.reddit, **url(gh('karlicoss/rexport'))),
+    _mi('exp_pinb'       , label='DAL', **E.pinb  , **url(gh('karlicoss/pinbexport'))),
     _mi('exp_twitter'    , label='DAL', **E.tw),
     _mi('exp_endomondo'  , label='DAL', **E.end,    **url(gh('karlicoss/endoexport')), id='dal'), # eh. id here is kinda arbitrary...
     _mi('exp_instapaper' , label='DAL', **E.ip,     **url(gh('karlicoss/instapexport'))),
@@ -685,9 +693,10 @@ def pipelines():
 
         *edges(end_api, endoexport, exp_endomondo, E.end),
 
-        *edges(tg_api, tgbackup, exp_telegram, E.tg),
-        *edges(reddit_api, rexport, 'exp_reddit', E.reddit),
-        *edges('kobo_sqlite', kobuddy, 'exp_kobo', E.kobo),
+        *edges(tg_api    , tgbackup  , exp_telegram, E.tg),
+        *edges(reddit_api, rexport   , exp_reddit  , E.reddit),
+        *edges(pinb_api  , pinbexport, exp_pinb    , E.pinb),
+        *edges('kobo_sqlite', kobuddy, exp_kobo    , E.kobo),
 
         edge(jb_api, 'jbexport', E.jb, color=red),
         edge('jbexport', 'exp_jawbone', E.jb),
@@ -853,6 +862,7 @@ col_blood   = red
 col_weight  = 'brown'
 col_reddit  = 'pink'
 col_ip      = 'lightgray'
+col_pinb    = '#3975fa'
 
 
 tw_api = api_node()
@@ -879,6 +889,14 @@ reddit = cluster(
     label='Reddit',
 )
 
+pinb_api = api_node()
+pinboard = cluster(
+    pinb_api,
+    CLOUD,
+    color=col_pinb,
+    label='Pinboard', # TODO url?
+)
+
 
 class E:
     # TODO warn on conflict?
@@ -891,6 +909,7 @@ class E:
     weight = dict(arrowhead=diamond, fillcolor=col_weight)
     reddit = dict(arrowhead=diamond, fillcolor=col_reddit)
     ip     = dict(arrowhead=diamond, fillcolor=col_ip)
+    pinb   = dict(arrowhead=diamond, fillcolor=col_pinb)
 
 # meh...
 colmap = {
@@ -902,6 +921,7 @@ colmap = {
     my.weight: E.weight,
     my.reddit: E.reddit,
     my.instapaper: E.ip,
+    my.pinboard  : E.pinb,
 }
 
 
@@ -1027,8 +1047,8 @@ def generate() -> str:
         telegram,
         twittercom,
 
+        pinboard,
         reddit,
-        # telegram,
         vkcom,
         google,
         endomondo,
