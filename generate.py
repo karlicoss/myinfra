@@ -394,17 +394,13 @@ filesystem = cluster(
     data_weight,
     data_blood,
     data_sleep,
-    exp_twitter,
-    exp_twitter_archives,
     'style=invis'
     '}',
 
-    # cluster_fewfwfjwf,
-
-
-
-    exp_reddit,
     exp_telegram,
+    exp_reddit,
+    exp_twitter,
+    exp_twitter_archives,
     exp_jawbone,
     exp_kobo,
     exp_takeouts,
