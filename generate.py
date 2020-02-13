@@ -240,18 +240,21 @@ takeout_manual = node(
 )
 
 
+def bb(s):
+    return f'https://beeob00p.xyz/{s}'
+
 against_db = blog_post(
-    'https://beepb00p.xyz/unnecessary-db.html',
+    bb('unnecessary-db.html'),
     label='Against\nunnecessary databases',
 )
 
 mydata = blog_post(
-    'https://beepb00p.xyz/my-data.html',
+    bb('my-data.html'),
     label='What data I collect\nand why?',
 )
 
 scheduler = blog_post(
-    'https://beepb00p.xyz/scheduler.html',
+    bb('scheduler.html'),
     label='In search of\na friendlier scheduler',
     # TODO better is not a great adjective here.
     # friendlier??
@@ -259,13 +262,18 @@ scheduler = blog_post(
 
 
 brain_coping = blog_post(
-    'https://beepb00p.xyz/pkm-setup.html',
+    bb('pkm-setup.html'),
     label='How to cope with a human brain',
 )
 
 sad_infra = blog_post(
-    'https://beepb00p.xyz/sad-infra.html',
+    bb('sad-infra.html'),
     label='The sad state of\npersonal data and infrastructure',
+)
+
+dataliberation = blog_post(
+    bb('exports.html'),
+    label='Building data liberation\ninfrastructure'
 )
 
 
@@ -294,7 +302,7 @@ legend = cluster(
         **MANUAL,
     ), # TODO order?
     blog_post(
-        'https://beepb00p.xyz',
+        bb(''),
         label='Entry from my blog\n(clickable)',
         name='legend_blog',
     ),
@@ -332,6 +340,7 @@ exports = cluster(
     kobuddy,
     emfitexport,
     scheduler,
+    dataliberation,
 
     label='Export scripts', # TODO bit misleading; contains manual?
     style=dashed,
