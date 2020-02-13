@@ -17,7 +17,7 @@ def gh(x: str) -> str:
     return f'https://github.com/{x}'
 
 def bb(x: str) -> str:
-    return f'https://beeob00p.xyz/{x}'
+    return f'https://beepb00p.xyz/{x}'
 
 
 BLOG_COLOR = purple
@@ -85,23 +85,29 @@ def blog_post(link: str, *args, **kwargs) -> Node:
 
 
 
+def bbm(x: str):
+    return bb(f'my-data.html#{x}')
+
 scales = node(
+    label='scales',
+    **url(bbm('weight')),
     **DEVICE,
 )
 
 blood_tests = node(
     label='Blood tests\n(GP/Thriva/etc)',
+    **url(bbm('blood'))
 )
 
 sleep_subj = node(
     label='Sleep data\n(subjective)', # TODO link?
-    **url(bb('my-data.html#sleep')),
+    **url(bbm('sleep')),
 )
 
 
 # TODO FIXME blog edge
 blog_orger = blog_post(
-    'https://beepb00p.xyz/orger.html',
+    bb('orger.html'),
     label='Orger: plaintext reflection\nof your digital self',
     # constraint='false', # TODO # eh?
 )
@@ -175,7 +181,7 @@ syncthing_cl = cluster(
 
 # TODO these three are same level as orger?
 dashboard = node(
-    **url('https://beepb00p.xyz/my-data.html#dashboard'),
+    **url(bb('my-data.html#dashboard')),
     label='Dashboard',
     shape=star,
 )
@@ -184,7 +190,7 @@ dashboard = node(
 timeline = node(
     label='Timeline',
     shape=star,
-    **url('https://beepb00p.xyz/tags.html#lifelogging'),
+    **url(bb('tags.html#lifelogging')),
 )
 
 promnesia = node(
@@ -620,8 +626,9 @@ def mypkg_incoming_edges():
     _mi('exp_emfit'),
     _mi('exp_vk'),
     _mi('data_weight', **E.weight),
-    _mi('data_blood', **E.blood),
-    # TODO orgparse
+    _mi('data_blood' , **E.blood ),
+    _mi('data_sleep'             ),
+    # TODO eh, orgparse is a bit unreadable there..
     # TODO note how this edge is still active despite the fact that jbexport isn't working anymore
 ])
 
