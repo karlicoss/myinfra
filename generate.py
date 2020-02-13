@@ -292,7 +292,7 @@ meta = cluster(
     brain_coping,
     sad_infra,
     mydata,
-    *edges(brain_coping, sad_infra, **INVIS),
+    # *edges(brain_coping, sad_infra, **INVIS),
     label="Meta\n(why I'm doing all this?)",
     style=dashed,
 )
@@ -1038,8 +1038,13 @@ cluster_enforce_ordering = cluster(
 
 def generate() -> str:
     items = [
-        legend,
-        meta,
+        cluster(
+            legend,
+            meta,
+            edge('legend_ui', sad_infra, INVIS),
+            INVIS,
+            name='group',
+        ),
 
         phone,
 
@@ -1058,7 +1063,7 @@ def generate() -> str:
         devices,
         emfit,
         kobo,
-        syncthing_cl, # TODO maybe should't be a sluster??
+        # syncthing_cl, # TODO maybe should't be a sluster??
 
         edge(app_endomondo, end_api),
         edge(app_jawbone, jb_api),
@@ -1066,9 +1071,8 @@ def generate() -> str:
         # TODO hmm, syncthing could be an edge
 
 
-        *edges(app_bm, syncthing, exp_bluemaestro), # TODO here, a rooted script is involved
+        # *edges(app_bm, syncthing, exp_bluemaestro), # TODO here, a rooted script is involved
         # TODO not sure about that..
-        # *edges(app_bm, exp_bluemaestro, label='Syncthing'),
 
         orger,
         orger_outputs,
@@ -1085,6 +1089,7 @@ def generate() -> str:
         promnesia,
         '}',
 
+        *edges(app_bm, exp_bluemaestro, label='Syncthing', **url('https://syncthing.net')),
         *post(),
     ]
     return '\n'.join(map(render, items))
