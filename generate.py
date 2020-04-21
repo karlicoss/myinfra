@@ -213,6 +213,7 @@ timeline = node(
     **url(bb('tags.html#lifelogging')),
 )
 
+# TODO needs to be a cluster?
 promnesia = node(
     **url(gh('karlicoss/promnesia')),
     label='Promnesia',
@@ -686,6 +687,7 @@ def mypkgcl():
 
         *mypkg_incoming_edges(),
 
+        *mypkg_promnesia_edges,
         mypkg_out,
 
         # TODO group together cachew/mypy_err in a table?
@@ -699,7 +701,6 @@ def mypkgcl():
         edge(mypkg_out, orger_point), # TODO not sure if belongs here..
 
         *mypkg_module_edges,
-        *mypkg_promnesia_edges,
         *mypkg_dashboard_edges,
 
         # *url(gh('karlicoss/my')),
@@ -862,10 +863,12 @@ node [style=invis,shape=point];
 col_tg = '#0088cc'
 
 def api_node(*args, **kwargs):
+    if 'color' not in kwargs:
+        kwargs['color'] = '#00000066'
+    kwargs['shape'] = diamond
     return node(
         label='API',
-        shape='diamond',
-        color='#00000066',
+        **kwargs,
     )
 
 
@@ -1026,7 +1029,7 @@ emfit_cloud = cluster(
     label='Emfit',
 )
 
-jb_api = api_node()
+jb_api = api_node(color=red)
 # TODO demonstrate that it's dead
 # TODO not sure. wedged? striped? invert colors?
 # TODO better way to mark dead?
@@ -1144,6 +1147,9 @@ def generate() -> str:
         # *edges(app_bm, syncthing, exp_bluemaestro), # TODO here, a rooted script is involved
         # TODO not sure about that..
 
+        '{',
+        promnesia,
+        '}',
         orger,
         orger_outputs,
         emacs,
@@ -1155,8 +1161,9 @@ def generate() -> str:
 
         '{',
         dashboard,
+        '}',
+        '{',
         timeline,
-        promnesia,
         '}',
 
         # TODO hmm. instead, add 'ports' and mention that ports are attached to syncthing?
