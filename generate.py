@@ -112,6 +112,11 @@ blog_orger = blog_post(
     # constraint='false', # TODO # eh?
 )
 
+blog_orger_roam = blog_post(
+    bb('myinfra-roam.html#orger'),
+    label='Using Orger for\nRoam Research',
+)
+
 orger_point = node(shape=point)
 
 def orger_static() -> List[str]:
@@ -149,8 +154,12 @@ orger = cluster(
     orger_point,
     orger_static_node,
     orger_int_node,
+
     blog_orger,
-    edge(orger_point, blog_orger, **BLOG_EDGE, constraint='false'),
+    blog_orger_roam,
+    # edge(orger_point, blog_orger     , **BLOG_EDGE, constraint='false'),
+    # edge(orger_point, blog_orger_roam, **BLOG_EDGE, constraint='false'),
+    #
     # 'blog_orger -> module_twitter [style=invis]',
     url(gh('karlicoss/orger')),
     label='Orger',
@@ -164,7 +173,7 @@ orger_outputs = cluster(
     'node [shape=cylinder]',
     orger_outputs_point,
     edge(orger_static_node, '"readonly views"'),
-    edge(orger_int_node   , '"interative views"'), # TODO
+    edge(orger_int_node   , '"interactive views"'), # TODO
     edge(orger_int_node   , '"todo lists"'),
     label='Org-mode files',
     style=dashed,
@@ -338,7 +347,7 @@ legend = cluster(
     style=dashed,
 )
 
-twexport = node(**AUTO)
+twint = node(**AUTO, **url(gh('twintproject/twint')))
 jbexport = node(**AUTO)
 # jbexport [shape=cds]; // TODO cross out maybe?
 
@@ -346,7 +355,7 @@ rexport    = node(**AUTO, **url(gh('karlicoss/rexport')))
 pinbexport = node(**AUTO, **url(gh('karlicoss/pinbexport')))
 
 exports = cluster(
-    twexport,
+    twint,
     tw_manual,
     vkexport,
     tgbackup,
@@ -436,13 +445,13 @@ filesystem = cluster(
 
 
 mypkg = node(
-    **url('https://github.com/karlicoss/my'),
-    label='import my',
+    **url('https://github.com/karlicoss/HPI'),
+    label='HPI (Human Programming Interface)',
 )
 
 blog_mypkg = blog_post(
-    'https://beepb00p.xyz/mypkg.html',
-    label='my. package:\nPython interface to my life',
+    'https://beepb00p.xyz/hpi.html',
+    label='HPI:\nMy life in a Python package',
 )
 
 # TODO color arrows all the way through? so it's possible to trace how data propagates
@@ -505,7 +514,7 @@ class my:
     tg         = 'my_telegram'
     tw         = 'my_twitter'
     vk         = 'my_vk'
-    weight     = 'my_weight'
+    weight     = 'my_body_weight'
     sleep      = 'my_sleep'
     ex         = 'my_exercise'
     cal        = 'my_calendar'
@@ -515,13 +524,14 @@ class my:
 
 def mymodule_url(module: str) -> Optional[str]:
     if module in {
-            my.weight, my.sleep, my.ex
+            my.ex,
+            my.sleep,
     }:
         # private atm
         return None
     mp = module.replace('_', '/')
     pp = 'karlicoss/my/blob/master/' + mp
-    addpy = module not in {my.cal} # meh, hacky
+    addpy = module not in {my.cal, my.tw} # meh, hacky
     if addpy:
         pp += '.py'
     return gh(pp)
@@ -673,8 +683,8 @@ def mypkgcl():
         *mypkg_dashboard_edges,
 
         # *url(gh('karlicoss/my')),
-        url('#mypkg'),
-        label='my. package',
+        url('#mypkg'), # TOOD add extra id?
+        label='Human Programming Interface',
         id='mypkg',
 
 
@@ -693,8 +703,8 @@ def pipelines():
         filesystem,
 
         # TODO maybe, patch stroke in python?
-        *edges(tw_api, twexport, 'exp_twitter', E.tw),
-        *edges(tw_archive, tw_manual,'exp_twitter_archives', E.tw),
+        *edges(tw_api    , twint    , 'exp_twitter'         , E.tw),
+        *edges(tw_archive, tw_manual, 'exp_twitter_archives', E.tw),
 
         *edges(end_api, endoexport, exp_endomondo, E.end),
 
@@ -746,8 +756,8 @@ def post():
     tbro = browser('timeline' , label='Browser\n(HTML)')
     pbro = browser('promnesia', label='Browser\n(extension)')
     items = [
-        edge('exp_takeouts', promnesia, label='Browsing history'),
-        edge('exp_telegram', promnesia, label='Telegram'),
+        # edge('exp_takeouts', promnesia, label='Browsing history'),
+        # edge('exp_telegram', promnesia, label='Telegram'),
 
         ipython,
 
@@ -788,7 +798,7 @@ node [style=invis,shape=point];
     app_bm,
     gps,
     DEVICE,
-    label='Phone\n(Android)',
+    label='Android\nphone',
 )
 
 
@@ -1120,3 +1130,5 @@ if __name__ == '__main__':
 # TODO add hover anchors everywhere
 
 # TODO hmm, use xlabel? it doesn't impact layout, might be useful for edges?
+
+# TODO add emacs as org-mode interface?
