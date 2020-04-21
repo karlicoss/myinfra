@@ -40,11 +40,14 @@ DEVICE = {
     'color': gray,
 }
 
+noarrow = {
+    'arrowhead': 'none',
+}
 
 BLOG_EDGE = {
     'color': BLOG_COLOR,
     'style': dashed,
-    'arrowhead': 'none',
+    **noarrow,
 }
 
 
@@ -59,6 +62,7 @@ NOCONSTRAINT = {
 
 
 CYLINDER = {
+    # ok, cylinder doesn't take too much extra space
     'shape': cylinder,
 }
 
@@ -68,7 +72,10 @@ AUTO = {
 
 
 MANUAL = {
-    'shape': 'invtrapezium',
+    # ok, trapezium wastes a bit too much space
+    # 'shape': 'invtrapezium',
+    'style': filled,
+    'color': '#fff380',
 }
 
 
@@ -105,11 +112,10 @@ sleep_subj = node(
 )
 
 
-# TODO FIXME blog edge
+# TODO blog edge?
 blog_orger = blog_post(
     bb('orger.html'),
     label='Orger: plaintext reflection\nof your digital self',
-    # constraint='false', # TODO # eh?
 )
 
 blog_orger_roam = blog_post(
@@ -188,7 +194,7 @@ syncthing_cl = cluster(
     syncthing,
     CLOUD,
     url('https://syncthing.net'),
-    color='lightblue', # TODO fill?
+    color=lightblue, # TODO fill?
     label='Syncthing',
 )
 
@@ -376,6 +382,12 @@ exports = cluster(
     id='exports',
     **url('#exports'), # TODO show anchor sign?
 )
+#
+# TODO legend?
+CLOUD_SYNC = dict(
+    style=dashed,
+    **CYLINDER,
+)
 
 
 data_weight = node(label='org-mode')
@@ -396,7 +408,9 @@ exp_vk         = node(label='json')
 exp_endomondo  = node(label='json')
 exp_instapaper = node(label='json')
 # ugh. seems like a bug, it should inherit cylinder spect from the cluster
-exp_bluemaestro = node(label='sqlite', **CYLINDER)
+exp_bluemaestro   = node(label='sqlite', **CLOUD_SYNC, color=blue)
+exp_materialistic = node(label='sqlite', **CLOUD_SYNC, color=orange)
+# TODO FIXME when I hover, highlight both?
 
 
 # eh. also just to order properly
@@ -427,6 +441,7 @@ filesystem = cluster(
     exp_endomondo,
     exp_instapaper,
     exp_bluemaestro,
+    exp_materialistic,
     # TODO mention kython.ktakeout??
     'subgraph filesystem_blog {',
     against_db,
@@ -557,7 +572,7 @@ def mypkg_module(*, module: str, lid: int):
 # TODO font isn't great..
 mypkg_module_edges = chain.from_iterable(
     mypkg_module(module=l, lid=i) for i, l in enumerate([
-        # 'Org files', # TODO FIXME that perhaps should link from the filesystem..
+        # 'Org files', # TODO that perhaps should link from the filesystem..
         my.fbm,
         my.hyp,
         my.instapaper,
@@ -633,11 +648,12 @@ def mypkg_incoming_edges():
     return chain.from_iterable([
     _mi('exp_reddit'     , label='DAL', **E.reddit, **url(gh('karlicoss/rexport'))),
     _mi('exp_pinb'       , label='DAL', **E.pinb  , **url(gh('karlicoss/pinbexport'))),
-    _mi('exp_twitter'    , label='DAL', **E.tw),
+    _mi('exp_twitter'                 , **E.tw),
     _mi('exp_endomondo'  , label='DAL', **E.end,    **url(gh('karlicoss/endoexport')), id='dal'), # eh. id here is kinda arbitrary...
     _mi('exp_instapaper' , label='DAL', **E.ip,     **url(gh('karlicoss/instapexport'))),
     _mi('exp_kobo'       , label='DAL', **E.kobo,   **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
+    _mi('exp_materialistic'),
 
     _mi('exp_takeouts'),
     _mi('exp_twitter_archives', **E.tw),
@@ -736,7 +752,7 @@ def pipelines():
     ]
     return items
 
-# TODO FIXME remove nodes when there is no data access layer??
+# TODO remove nodes when there is no data access layer??
 
 def browser(for_, label='Browser'):
     # returns new node deliberately, to prevent edge clutter
@@ -783,10 +799,37 @@ def post():
     return items
 
 
-gps = node()
-app_bm = node()
+# TODO give it color?
+# TODO actually make node attributes accessible in runtime? so I could do smth.color?
+app_bluemaestro_sqlite   = node(label='sqlite', **CLOUD_SYNC, color=blue)
+app_materialistic_sqlite = node(label='sqlite', **CLOUD_SYNC, color=orange)
+# phone_syncthing          = node(label='Syncthing', **CLOUD) # TODO fill with lightblue?
+
+phone_fss = cluster(
+    '''
+node [style=solid,shape=rectangle];
+    ''',
+    app_bluemaestro_sqlite,
+    app_materialistic_sqlite,
+    # phone_syncthing,
+    label='Filesystem',
+)
+
+gps = node(label='GPS', shape='rectangle', style='solid')
+app_bm = node(
+    label='Bluemaestro\napp',
+    style='solid',
+    shape='rectangle',
+)
 app_endomondo = node()
 app_jawbone = node()
+
+app_materialistic = node(
+    label='Materialistic\n(Hackernews app)',
+    **url('hidroh/materialistic'),
+    style='solid',
+    shape='rectangle',
+)
 
 phone = cluster(
     # TODO remove arrows as well?
@@ -795,8 +838,15 @@ node [style=invis,shape=point];
     ''',
     app_endomondo,
     app_jawbone,
-    app_bm,
     gps,
+    app_bm,
+    phone_fss,
+    # TODO demonstrate that root is necessary??
+    edge(app_bm           , app_bluemaestro_sqlite  , style=dashed, **noarrow),
+    app_materialistic,
+    edge(app_materialistic, app_materialistic_sqlite, style=dashed, **noarrow),
+    # TODO dashed? to illustrate it's 'using'
+    # edge(app_materialistic, phone_fs),
     DEVICE,
     label='Android\nphone',
 )
@@ -860,7 +910,7 @@ google = cluster(
     blog_takeout_data_gone,
     '}',
 
-    edge(google_takeout, blog_takeout_data_gone, **BLOG_EDGE, constraint='false'),
+    edge(google_takeout, blog_takeout_data_gone, **BLOG_EDGE, **NOCONSTRAINT),
     CLOUD,
     color=orange,
     label='Google',
@@ -1025,17 +1075,15 @@ bluemaestro = node(
 )
 
 devices = cluster(
-    wahoo,
-    edge(wahoo, app_endomondo, label='BT'),
-
-    jawbone_band,
-    edge(jawbone_band, app_jawbone, label='BT'),
-
     bluemaestro,
-    edge(bluemaestro, app_bm, label='BT'),
-
-    emfit,
+    wahoo,
+    jawbone_band,
     kobo,
+    emfit,
+
+    edge(wahoo, app_endomondo, label='BT'),
+    edge(jawbone_band, app_jawbone, label='BT'),
+    edge(bluemaestro, app_bm, label='BT'),
 
     # label='Devices',
     # style=dashed,
@@ -1104,7 +1152,9 @@ def generate() -> str:
         promnesia,
         '}',
 
-        *edges(app_bm, exp_bluemaestro, label='Syncthing', **url('https://syncthing.net')),
+        # TODO hmm. instead, add 'ports' and mention that ports are attached to syncthing?
+        # *edges(app_bm           , exp_bluemaestro  , label='Syncthing', **url('https://syncthing.net')),
+        # *edges(app_materialistic, exp_materialistic, label='Syncthing', **url('https://synchting.get')),
         *post(),
     ]
     return '\n'.join(map(render, items))
