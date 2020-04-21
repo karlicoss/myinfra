@@ -32,7 +32,11 @@ def fix_edge(e):
     t.text = None
     tp = ET.SubElement(t, 'textPath')
     tp.attrib['href'] = '#' + lid
-    offset = 40 if label == 'DAL' else 60 # TODO FIXME horrible..
+
+    # TODO FIXME horrible..
+    # NOTE careful if you change this.. it's fixed in the blog CSS
+    offset = 40 if label == 'DAL' else 7
+
     tp.attrib['startOffset'] = f'{offset}%'
     tp.attrib['side'] = 'right'
     tp.text = label

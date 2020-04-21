@@ -535,6 +535,7 @@ class my:
     cal        = 'my_calendar'
     blood      = 'my_body_blood'
     pinboard   = 'my_pinboard'
+    materialistic = 'my_materialistic'
 
 
 def mymodule_url(module: str) -> Optional[str]:
@@ -578,6 +579,7 @@ mypkg_module_edges = chain.from_iterable(
         my.instapaper,
         my.pocket,
         my.reddit,
+        my.materialistic,
         # my.tg,
         my.tw,
         my.vk,
@@ -598,6 +600,7 @@ mypkg_promnesia_edges = [
         my.instapaper,
         my.pocket,
         my.reddit,
+        my.materialistic,
         # my.tg,
         my.tw,
         my.vk,
@@ -626,7 +629,8 @@ def _mi(from_, **kwargs):
     if label != 'DAL': # TODO how to link to 'data access layer'??
         # hacky...
         # TODO maybe do the opposite? if dal, then arrowhead
-        kwargs['arrowhead'] = 'none'
+        if 'arrowhead' not in kwargs:
+            kwargs['arrowhead'] = 'none'
         auxcol.update(dict(
             color=black,
             style=point,
@@ -653,7 +657,7 @@ def mypkg_incoming_edges():
     _mi('exp_instapaper' , label='DAL', **E.ip,     **url(gh('karlicoss/instapexport'))),
     _mi('exp_kobo'       , label='DAL', **E.kobo,   **url(gh('karlicoss/kobuddy'))),
     _mi('exp_bluemaestro'),
-    _mi('exp_materialistic'),
+    _mi('exp_materialistic'           , **E.mtrl),
 
     _mi('exp_takeouts'),
     _mi('exp_twitter_archives', **E.tw),
@@ -815,7 +819,7 @@ node [style=solid,shape=rectangle];
     label='Filesystem',
 )
 
-gps = node(label='GPS', shape='rectangle', style='solid')
+gps = node(label='GPS', shape=diamond, style='solid')
 app_bm = node(
     label='Bluemaestro\napp',
     style='solid',
@@ -922,6 +926,7 @@ google = cluster(
 col_twitter = lightblue
 col_end     = green
 col_kobo    = '#bf2026'
+col_hn      = orange
 col_jb      = '#540baf'
 col_blood   = red
 col_weight  = 'brown'
@@ -975,6 +980,7 @@ class E:
     reddit = dict(arrowhead=diamond, fillcolor=col_reddit)
     ip     = dict(arrowhead=diamond, fillcolor=col_ip)
     pinb   = dict(arrowhead=diamond, fillcolor=col_pinb)
+    mtrl   = dict(arrowhead=diamond, fillcolor=col_hn)
 
 # meh...
 colmap = {
@@ -987,6 +993,7 @@ colmap = {
     my.reddit: E.reddit,
     my.instapaper: E.ip,
     my.pinboard  : E.pinb,
+    my.materialistic: E.mtrl,
 }
 
 
@@ -1182,3 +1189,5 @@ if __name__ == '__main__':
 # TODO hmm, use xlabel? it doesn't impact layout, might be useful for edges?
 
 # TODO add emacs as org-mode interface?
+
+# TODO mention that you can follow diamonds to see how the data flows through the system
