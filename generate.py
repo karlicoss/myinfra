@@ -123,8 +123,6 @@ blog_orger_roam = blog_post(
     label='Using Orger for\nRoam Research',
 )
 
-orger_point = node(shape=point)
-
 def orger_static() -> List[str]:
     return [
         'kobo',
@@ -133,6 +131,7 @@ def orger_static() -> List[str]:
         'youtube',
         'hypothesis',
         'github',
+        'polar',
         # TODO actually get them straight from orger modules?
     ]
 
@@ -145,17 +144,18 @@ def orger_todos() -> List[str]:
     ]
 
 orger_static_node = node(
-    label='\n'.join(['Static modules'] + orger_static())
+    label='\n'.join(['Mirrors:'] + orger_static())
 )
 
 # TODO come up with a better name.. it involves reddit and hackerviews too
 orger_int_node = node(
-    label='\n'.join(['Interactive modules'] + orger_todos())
+    label='\n'.join(['Queues:'] + orger_todos())
 )
 
 # TODO instead of orger, it should be 'Plaintext reflections' or smth like that
 # TODO reduce distance between edges...
 # TODO eh. maybe instead simply list/url modules and only split into interactive/static?
+orger_point = node(label='Github: orger', **url(gh('karlicoss/orger')))
 orger = cluster(
     orger_point,
     orger_static_node,
@@ -167,22 +167,53 @@ orger = cluster(
     # edge(orger_point, blog_orger_roam, **BLOG_EDGE, constraint='false'),
     #
     # 'blog_orger -> module_twitter [style=invis]',
-    url(gh('karlicoss/orger')),
     label='Orger',
     style=dashed,
+    id='orger',
+    **url('#orger'), # TODO show anchor sign?
+    # url(gh('karlicoss/orger')),
 )
 
 # TODO add .point attribute to cluster?
 orger_outputs_point = node(shape=point)
 
+
+pkm_search_post = blog_post(
+    bb('pkm-search.html'),
+    label='Building personal\nsearch engine',
+)
+
 orger_outputs = cluster(
     'node [shape=cylinder]',
     orger_outputs_point,
-    edge(orger_static_node, '"readonly views"'),
-    edge(orger_int_node   , '"interactive views"'), # TODO
+    edge(orger_static_node, '"data mirrors"'),
+    edge(orger_int_node   , '"interactive queues"'), # TODO
     edge(orger_int_node   , '"todo lists"'),
+    pkm_search_post,
     label='Org-mode files',
     style=dashed,
+)
+
+promnesia_post = blog_post(
+    bb('promnesia.html'),
+    label='Promnesia\nA journey in fixing\nbrowser history',
+)
+
+promnesia_roam = blog_post(
+    bb('myinfra-roam.html'),
+    label='Extending my personal infrastructure',
+)
+
+promnesia_point = node(name='promnesia', label='Github: promnesia', **url(gh('karlicoss/promnesia#readme')))
+# TODO needs to be a cluster?
+promnesia_cl = cluster(
+    promnesia_point,
+    promnesia_post,
+    label='Promnesia',
+    style=dashed,
+    id='promnesia',
+    **url('#promnesia'), # TODO show anchor sign?
+    # url(gh('karlicoss/promnesia')),
 )
 
 
@@ -208,22 +239,16 @@ dashboard = node(
 
 
 timeline = node(
-    label='Timeline',
+    label='Timeline\n/Memex',
     shape=star,
     **url(bb('tags.html#lifelogging')),
 )
 
-# TODO needs to be a cluster?
-promnesia = node(
-    **url(gh('karlicoss/promnesia')),
-    label='Promnesia',
-    shape=star,
-)
-
 
 emacs = node(
-    label='Emacs\n(Spacemacs)',
+    label='Emacs\n(Doom)',
     **UI,
+    **url('https://github.com/hlissner/doom-emacs'),
 )
 
 
@@ -462,7 +487,7 @@ filesystem = cluster(
 
 mypkg = node(
     **url('https://github.com/karlicoss/HPI'),
-    label='HPI (Human Programming Interface)',
+    label='Github: HPI',
 )
 
 blog_mypkg = blog_post(
@@ -494,7 +519,7 @@ inp_sleep = node(
 )
 
 mypy_err = blog_post(
-    'https://beepb00p.xyz/mypy-error-handling.html',
+    bb('mypy-error-handling.html'),
     label='Using mypy for\nerror handling',
 )
 # TODO use different style
@@ -502,12 +527,20 @@ cachew = node(
     label='cachew\npersistent cache/serialization',
     **url('https://github.com/karlicoss/cachew'),
 )
+
+configs_suck = blog_post(
+    bb('configs-suck.html'),
+    label='Configs suck',
+)
+
+
 mypkg_out = node('mypkg_out', shape='point')
 # TODO space out mypkg_out nodes?
 
 # TODO not sure...
 mypkg_usecases = cluster(
     blog_hb_kcals,
+    promnesia_roam,
     label='Usecases',
     style=dashed,
     # TODO diff stroke color?
@@ -515,6 +548,7 @@ mypkg_usecases = cluster(
 
 mypkg_tech = cluster(
     mypy_err,
+    configs_suck,
     cachew,
     label='Libraries/patterns',
     style=dashed,
@@ -595,7 +629,7 @@ mypkg_module_edges = chain.from_iterable(
 )
 
 mypkg_promnesia_edges = [
-    edge(mod, promnesia) for mod in {
+    edge(mod, promnesia_point) for mod in {
         my.fbm,
         my.hyp,
         my.instapaper,
@@ -759,12 +793,13 @@ def pipelines():
 
 # TODO remove nodes when there is no data access layer??
 
-def browser(for_, label='Browser'):
+def browser(for_, label='Browser', **kwargs):
     # returns new node deliberately, to prevent edge clutter
     return node(
         name=f'browser_for_{for_}',
         label=label,
         **UI,
+        **kwargs,
     )
 
 ipython = node(
@@ -775,7 +810,7 @@ ipython = node(
 def post():
     dbro = browser('dashboard', label='Browser\n(HTML)')
     tbro = browser('timeline' , label='Browser\n(HTML)')
-    pbro = browser('promnesia', label='Browser\n(extension)')
+    pbro = browser('promnesia', label='Browser\n(extension)', **url('https://github.com/karlicoss/promnesia#demos'))
     items = [
         # edge('exp_takeouts', promnesia, label='Browsing history'),
         # edge('exp_telegram', promnesia, label='Telegram'),
@@ -789,7 +824,7 @@ def post():
         edge(timeline, tbro),
 
         pbro,
-        edge(promnesia, pbro),
+        edge(promnesia_point, pbro),
 
         edge(mypkg_out, ipython),
 
@@ -1147,9 +1182,7 @@ def generate() -> str:
         # *edges(app_bm, syncthing, exp_bluemaestro), # TODO here, a rooted script is involved
         # TODO not sure about that..
 
-        '{',
-        promnesia,
-        '}',
+        promnesia_cl,
         orger,
         orger_outputs,
         emacs,
