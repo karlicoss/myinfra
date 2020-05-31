@@ -23,18 +23,19 @@ red    = 'red'
 purple = 'purple'
 
 
+_MODULE_NAME: Optional[str] = None
 
 
-_mname: Optional[str] = None
 def _id2obj() -> Dict[int, Any]:
-    assert _mname is not None
-    globs = vars(sys.modules[_mname])
+    # todo document/test
+    assert _MODULE_NAME is not None, 'Looks like you forgot to init()'
+    globs = vars(sys.modules[_MODULE_NAME])
     return {id(v): k for k, v in globs.items()}
 
 
 def init(mname: str):
-    global _mname
-    _mname = mname
+    global _MODULE_NAME
+    _MODULE_NAME = mname
 
 
 def get_name(obj: Any) -> str:
@@ -204,8 +205,54 @@ def url(u: str, color=EXTERNAL) -> Extra:
     }
 
 
-def render(x):
+def render(x) -> str:
     if isinstance(x, str):
         return x
-    else:
+    elif hasattr(x, 'render'):
         return '\n'.join(x.render())
+    elif isinstance(x, Iterable):
+        return '\n'.join(render(c) for c in x)
+    else:
+        raise RuntimeError(f"Unsupported: {x}")
+
+
+def test_node() -> None:
+    n = node(name='test', shape='star', label="Some node")
+    r = render(n)
+    # todo not sure about quotes for star?
+    assert r == '''
+test [
+  shape="star"
+  label="Some node"
+]
+'''.strip()
+
+
+def test_edges() -> None:
+    e = edges('node1', 'node2', 'node3')
+    r = render(e)
+    assert r == '''
+node1 -> node2
+node2 -> node3
+'''.strip()
+
+
+def test_cluster() -> None:
+    n1 = node(name='node1')
+    n2 = node(name='node2')
+    c = cluster(
+        'node [shape=point]',
+        n1,
+        n2,
+        edge(n1, n2),
+        name='testcluster',
+    )
+    r = render(c)
+    assert r == '''
+subgraph cluster_testcluster {
+  node [shape=point]
+  node1
+  node2
+  node1 -> node2
+}
+'''.strip()
