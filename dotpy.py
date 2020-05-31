@@ -2,6 +2,7 @@ import sys
 from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Union, Any
 
 
+# TODO move this away from core?
 cylinder = 'cylinder'
 diamond = 'diamond'
 point = 'point'
@@ -22,6 +23,9 @@ orange = 'orange'
 red    = 'red'
 purple = 'purple'
 
+record = dict(shape='record')
+noconstraint = dict(constraint='false')
+invisible = dict(style='invisible')
 
 _MODULE_NAME: Optional[str] = None
 
@@ -48,10 +52,11 @@ def get_name(obj: Any) -> str:
 Data = Union[str, Iterable[str]]
 
 
-class Subgraph(NamedTuple):
+class Graph(NamedTuple):
     name_: Optional[str]
     cluster: bool
     raw: Data
+    kind: str = 'subgraph'
 
     @property
     def name(self) -> str:
@@ -64,11 +69,12 @@ class Subgraph(NamedTuple):
     def render(self) -> Iterable[str]:
         name = self.name
         mcl = 'cluster_' if self.cluster else ''
-        yield f'subgraph {mcl}{name}' + ' {'
+        yield f'{self.kind} {mcl}{name}' + ' {'
         for x in [self.raw] if isinstance(self.raw, str) else self.raw:
             # TODO handle multiline stuff properly?
             yield '  ' + x
         yield '}'
+Subgraph = Graph # todo deprecate?
 
 
 Extra = Dict[str, str]
@@ -118,7 +124,14 @@ class Edge(NamedTuple):
 
 
 def _render(*args: str, **kwargs):
-    return list(args) + [f'{k}="{v}"' for k, v in kwargs.items()]
+    def quote(x: str) -> str:
+        # meh. this is for HTML labels...
+        if x[:1] + x[-1:] == '<>':
+            return x
+        else:
+            return f'"{x}"'
+
+    return list(args) + [f'{k}={quote(v)}' for k, v in kwargs.items()]
 
 
 SubgraphItem = Union[str, Dict, Node, Edge]
@@ -127,8 +140,9 @@ def subgraph(
         name: Optional[str]=None,
         cluster: bool=False,
         klass: Optional[str]=None,
+        kind: Optional[str]=None,
         **kwargs,
-) -> Subgraph:
+) -> Graph:
     mclass = {} if klass is None else {'class': klass}
     kw = {**kwargs, **mclass}
 
@@ -144,7 +158,7 @@ def subgraph(
                 # TODO a bit horrible..
                 # TODO also incorrect if we got inline bits of strings (e.g. adhoc 'subgraph whatever {')
                 kw.update(x)
-            elif isinstance(x, Subgraph):
+            elif isinstance(x, Graph):
                 yield from x.render()
             elif isinstance(x, str):
                 yield x
@@ -162,12 +176,24 @@ def subgraph(
             else:
                 raise RuntimeError(x)
     ag: Sequence[str] = list(it())
-    res = _render(*ag, **kw)
-    return Subgraph(name_=name, cluster=cluster, raw=res)
+    res = _render(*ag, **kw) # todo ??? what's going on here...
+    return Graph(name_=name, cluster=cluster, raw=res, **maybe(kind=kind))
+
+# todo not a great name?
+def maybe(**kwargs):
+    return {k: v for k, v in kwargs.items() if v is not None}
 
 
-def cluster(*args, **kwargs) -> Subgraph:
+def cluster(*args, **kwargs) -> Graph:
     return subgraph(*args, cluster=True, **kwargs)
+
+
+def graph(*args, **kwargs) -> Graph:
+    return subgraph(*args, **kwargs, kind='graph')
+
+
+def digraph(*args, **kwargs) -> Graph:
+    return subgraph(*args, **kwargs, kind='digraph')
 
 
 def node(name: Optional[str]=None, **kwargs) -> Node:
@@ -175,6 +201,7 @@ def node(name: Optional[str]=None, **kwargs) -> Node:
 
 
 EdgeArg = Union[Nodish, Dict]
+
 
 def edges(f: Nodish, t: Nodish, *args: EdgeArg, **kwargs) -> Iterator[Edge]:
     ee = [f, t]
@@ -218,15 +245,21 @@ def render(x) -> str:
 
 def test_node() -> None:
     n = node(name='test', shape='star', label="Some node")
-    r = render(n)
     # todo not sure about quotes for star?
-    assert r == '''
+    assert render(n) == '''
 test [
   shape="star"
   label="Some node"
 ]
 '''.strip()
 
+    # TODO not sure about this... maybe should be a distinguished class or something
+    n = node(name='test', label='< <b>HTML</b> >')
+    assert render(n) == '''
+test [
+  label=< <b>HTML</b> >
+]
+'''.strip()
 
 def test_edges() -> None:
     e = edges('node1', 'node2', 'node3')
@@ -234,6 +267,22 @@ def test_edges() -> None:
     assert r == '''
 node1 -> node2
 node2 -> node3
+'''.strip()
+
+
+def test_graph() -> None:
+    n1 = node(name='nnn')
+    # LR = dict(rankdir='LR')
+    g = graph(
+        'rankdir="LR"',
+        n1,
+        name='G',
+    )
+    assert render(g) == '''
+graph G {
+  rankdir="LR"
+  nnn
+}
 '''.strip()
 
 
