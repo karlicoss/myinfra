@@ -81,6 +81,7 @@ Extra = Dict[str, str]
 class Node(NamedTuple):
     name_: Optional[str]
     extra: Dict
+    set_class: bool = False # meh
 
     @property
     def name(self) -> str:
@@ -95,12 +96,17 @@ class Node(NamedTuple):
 
     def render(self) -> Iterable[str]:
         extra = {**self.extra}
+
+        if self.set_class:
+            assert 'class' not in extra, extra
+            extra['class'] = self.name
+
         if len(extra) == 0:
             yield self.name
             return
 
         yield f'{self.name} ['
-        for l in _render(**extra):
+        for l in _render(**extra, self_=self):
             yield '  ' + l
         yield ']'
 
@@ -122,16 +128,23 @@ class Edge(NamedTuple):
         extras = '' if len(kwargs) == 0 else ' [' + '\n'.join(_render(**kwargs)) + ']'
         yield f'{fn} -> {tn}' + extras
 
+from typing import Callable
+Prop = Union[str, Callable[[], str]]
 
-def _render(*args: str, **kwargs):
-    def quote(x: str) -> str:
+
+def _render(*args: str, self_=None, **kwargs):
+    def handle(x: Prop) -> str:
+        if isinstance(x, Callable):
+            x = x(self_=self_)
+        assert isinstance(x, str)
+
         # meh. this is for HTML labels...
         if x[:1] + x[-1:] == '<>':
             return x
         else:
             return f'"{x}"'
 
-    return list(args) + [f'{k}={quote(v)}' for k, v in kwargs.items()]
+    return list(args) + [f'{k}={handle(v)}' for k, v in kwargs.items()]
 
 
 SubgraphItem = Union[str, Dict, Node, Edge]
@@ -196,8 +209,8 @@ def digraph(*args, **kwargs) -> Graph:
     return subgraph(*args, **kwargs, kind='digraph')
 
 
-def node(name: Optional[str]=None, **kwargs) -> Node:
-    return Node(name_=name, extra=kwargs)
+def node(name: Optional[str]=None, set_class=False, **kwargs) -> Node:
+    return Node(name_=name, set_class=set_class, extra=kwargs)
 
 
 EdgeArg = Union[Nodish, Dict]
@@ -260,6 +273,28 @@ test [
   label=< <b>HTML</b> >
 ]
 '''.strip()
+
+    n = node(name='test', **{'class': 'custom'})
+    assert render(n) == '''
+test [
+  class="custom"
+]
+'''.strip()
+
+    n = node(name='test', set_class=True)
+    assert render(n) == '''
+test [
+  class="test"
+]
+'''.strip()
+
+    n = node(name='lazy', id=lambda self_: 'so_' + self_.name)
+    assert render(n) == '''
+lazy [
+  id="so_lazy"
+]
+'''.strip()
+
 
 def test_edges() -> None:
     e = edges('node1', 'node2', 'node3')
