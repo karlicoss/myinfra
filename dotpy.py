@@ -111,6 +111,7 @@ class Node(NamedTuple):
         yield ']'
 
 
+# todo label is actually name?
 Label = str
 Nodish = Union[Node, Label]
 class Edge(NamedTuple):
@@ -136,7 +137,7 @@ def _render(*args: str, self_=None, **kwargs):
     def handle(x: Prop) -> str:
         if isinstance(x, Callable):
             x = x(self_=self_)
-        assert isinstance(x, str)
+        assert isinstance(x, str), x
 
         # meh. this is for HTML labels...
         if x[:1] + x[-1:] == '<>':
@@ -254,6 +255,28 @@ def render(x) -> str:
         return '\n'.join(render(c) for c in x)
     else:
         raise RuntimeError(f"Unsupported: {x}")
+
+
+def with_style(*, svg: str, style: str) -> str:
+    from lxml import etree as ET # type: ignore
+    root = ET.fromstring(svg.encode('utf8')) # eh? lxml wants it
+    st = ET.SubElement(root, 'style')
+    st.text = style
+    return ET.tostring(root, pretty_print=True).decode('utf8')
+    # todo not sure if defs thing is necessary?
+    # <defs> </defs>
+
+NS = '{http://www.w3.org/2000/svg}'
+def svgns(s):
+    return NS + s
+
+
+def group(*things):
+    yield '{'
+    yield from things
+    yield '}'
+
+
 
 
 def test_node() -> None:
